@@ -1,0 +1,4 @@
+/Users/Di/Pós - Software Architect/billing-service/src/Billing.Service.Domain/obj/Debug/net8.0/Billing.Service.Domain.GeneratedMSBuildEditorConfig.editorconfig
+/Users/Di/Pós - Software Architect/billing-service/src/Billing.Service.Domain/obj/Debug/net8.0/Billing.Service.Domain.AssemblyInfoInputs.cache
+/Users/Di/Pós - Software Architect/billing-service/src/Billing.Service.Domain/obj/Debug/net8.0/Billing.Service.Domain.AssemblyInfo.cs
+/Users/Di/Pós - Software Architect/billing-service/src/Billing.Service.Domain/obj/Debug/net8.0/Billing.Service.Domain.csproj.CoreCompileInputs.cache

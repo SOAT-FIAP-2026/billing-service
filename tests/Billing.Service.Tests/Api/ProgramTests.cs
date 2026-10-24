@@ -1,0 +1,61 @@
+using Billing.Service.Infrastructure.Data;
+using Billing.Service.Tests.Api.Support;
+using FluentAssertions;
+using Microsoft.Extensions.DependencyInjection;
+using System.Net;
+using Xunit;
+
+namespace Billing.Service.Tests.Api
+{
+    public class ProgramTests : IClassFixture<ApiWebApplicationFactory>
+    {
+        private readonly ApiWebApplicationFactory _factory;
+
+        public ProgramTests(ApiWebApplicationFactory factory)
+        {
+            _factory = factory;
+        }
+
+        [Fact]
+        public async Task Application_DeveSubirEResponderComSucesso()
+        {
+            // Arrange
+            var client = _factory.CreateClient();
+
+            // Act - Tenta acessar o Swagger para validar que o pipeline está OK
+            var response = await client.GetAsync("/swagger/v1/swagger.json");
+
+            // Assert
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            response.Content.Headers.ContentType?.ToString().Should().Contain("application/json");
+        }
+
+        [Fact]
+        public async Task Application_DeveExporHealthcheckMetricsECorrelationId()
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, "/health/live");
+            request.Headers.Add("X-Correlation-ID", "teste-correlation-id");
+
+            var response = await _factory.CreateClient().SendAsync(request);
+
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            response.Headers.GetValues("X-Correlation-ID").Should().ContainSingle("teste-correlation-id");
+
+            var metricsResponse = await _factory.CreateClient().GetAsync("/metrics");
+            metricsResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+            metricsResponse.Content.Headers.ContentType?.MediaType.Should().Contain("text");
+        }
+
+        [Fact]
+        public void ServiceProvider_DeveResolverDependenciasSemErros()
+        {
+            // Arrange
+            using var scope = _factory.Services.CreateScope();
+            var services = scope.ServiceProvider;
+
+            // Act & Assert - Verifica se o contexto do banco foi registrado corretamente
+            var dbContext = services.GetService<ApplicationDbContext>();
+            dbContext.Should().NotBeNull();
+        }
+    }
+}
