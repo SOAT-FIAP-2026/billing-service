@@ -9,38 +9,38 @@ namespace Billing.Service.Api.Controllers.V1
     [Route("api/v1/orcamento")]
     public class OrcamentoController(IOrcamentoService orcamentoService) : ControllerBase
     {
-        private readonly IOrcamentoService _orcamentoService = ordemServicoService;
+        private readonly IOrcamentoService _orcamentoService = orcamentoService;
 
         [HttpPost]
-        public async Task<IActionResult> GerarOrcamento(Guid id)
+        public async Task<IActionResult> GerarOrcamento(Guid idOrdemServico, [FromBody] GerarOrcamentoRequest request)
         {
-            //var ordemServico = await _ordemServicoService.AprovarOrcamento(id, aprovado);
+            var orcamento = await _orcamentoService.GerarOrcamento(idOrdemServico, request.Servicos, request.PecasInsumo);
 
-            return Ok();
+            return Ok(orcamento);
         }
 
         [HttpGet]
-        public async Task<IActionResult> BuscarOrcamento(Guid id)
+        public async Task<IActionResult> BuscarOrcamento(Guid idOrcamento)
         {
-            //var ordemServico = await _ordemServicoService.AprovarOrcamento(id, aprovado);
+            var orcamento = await _orcamentoService.BuscarOrcamento(idOrcamento);
 
-            return Ok();
+            return Ok(orcamento);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> BuscarTodosOrcamentos(PagedRequest pagedRequest)
+        {
+            var orcamentos = await _orcamentoService.BuscarTodosOrcamentos(pagedRequest.Page, pagedRequest.PageSize);
+
+            return Ok(orcamento);
         }
 
         [HttpPost("{id:guid}/enviar-orcamento")]
-        public async Task<IActionResult> EnviarOrcamento(Guid id)
+        public async Task<IActionResult> EnviarOrcamento(Guid idOrcamento, [FromBody] EnviarOrcamentoRequest request)
         {
-            //var ordemServico = await _ordemServicoService.AprovarOrcamento(id, aprovado);
+            string resultado = await _orcamentoService.EnviarOrcamento(idOrcamento, request.EmailCliente);
 
-            return Ok();
-        }
-
-        [HttpPatch("{id:guid}/aprovar-orcamento")]
-        public async Task<IActionResult> AprovarOrcamento(Guid id, bool aprovado)
-        {
-            var ordemServico = await _ordemServicoService.AprovarOrcamento(id, aprovado);
-
-            return Ok(ordemServico);
+            return Ok(resultado);
         }
     }
 }

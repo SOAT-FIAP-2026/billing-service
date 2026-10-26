@@ -8,7 +8,6 @@ namespace Billing.Service.External.Configurations
     {
         public static IServiceCollection AddExternal(this IServiceCollection services)
         {
-            services.AddScoped<ITokenService, TokenService>();
             services.AddHttpClient<IEmailService, ResendEmailService>();
 
             return services;

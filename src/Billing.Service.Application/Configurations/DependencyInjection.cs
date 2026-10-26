@@ -9,7 +9,7 @@ namespace Billing.Service.Application.Configurations
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
             services.AddScoped<IAutenticacaoService, AutenticacaoService>();
-            services.AddScoped<IOrdemServicoService, OrdemServicoService>();
+            services.AddScoped<IOrcamentoService, OrcamentoService>();
             
             return services;
         }

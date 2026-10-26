@@ -23,6 +23,12 @@ namespace Billing.Service.Domain.Exceptions
             : base($"Usuário com login '{login}' não encontrado.") { }
     }
 
+    public class OrcamentoNaoEncontradoException : DomainException
+    {
+        public OrcamentoNaoEncontradoException(Guid id) 
+            : base($"Orçamento com ID '{id}' não encontrado.") { }
+    }
+
     /// <summary>
     /// Exceção lançada quando as credenciais são inválidas.
     /// </summary>

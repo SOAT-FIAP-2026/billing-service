@@ -21,11 +21,6 @@ namespace Billing.Service.Infrastructure.Data.Configurations
                 .HasColumnType("decimal(10,2)")
                 .IsRequired();
 
-            builder.HasOne(o => o.OrdemServico)
-                .WithOne(os => os.Orcamento)
-                .HasForeignKey<Orcamento>(o => o.IdOrdemServico)
-                .OnDelete(DeleteBehavior.Restrict);
-
             builder.HasIndex(o => o.IdOrdemServico).IsUnique();
 
             builder.Property(o => o.CriadoEm).HasColumnName("criado_em").IsRequired();
