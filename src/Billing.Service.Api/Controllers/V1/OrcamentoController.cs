@@ -2,6 +2,7 @@ using Billing.Service.Application.DTOs.Requests;
 using Billing.Service.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Billing.Service.Application.DTOs.Common;
 
 namespace Billing.Service.Api.Controllers.V1
 {
@@ -32,7 +33,7 @@ namespace Billing.Service.Api.Controllers.V1
         {
             var orcamentos = await _orcamentoService.BuscarTodosOrcamentos(pagedRequest.Page, pagedRequest.PageSize);
 
-            return Ok(orcamento);
+            return Ok(orcamentos);
         }
 
         [HttpPost("{id:guid}/enviar-orcamento")]

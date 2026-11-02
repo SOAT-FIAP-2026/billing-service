@@ -7,9 +7,10 @@ namespace Billing.Service.Api.Controllers.V1
 {
     [ApiController]
     [Route("api/v1/pagamento")]
-    public class PagamentoController(IPagamentoService pagamentoService) : ControllerBase
+    //public class PagamentoController(IPagamentoService pagamentoService) : ControllerBase
+    public class PagamentoController : ControllerBase
     {
-        private readonly IPagamentoService _pagamentoService = pagamentoService;
+        //private readonly IPagamentoService _pagamentoService = pagamentoService;
 
         [HttpPost]
         public async Task<IActionResult> RealizarPagamento(Guid id)

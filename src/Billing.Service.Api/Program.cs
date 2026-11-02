@@ -1,6 +1,5 @@
 using Billing.Service.Api;
 using Billing.Service.Infrastructure.Data;
-using Billing.Service.Infrastructure.Data.Seed;
 using Microsoft.EntityFrameworkCore;
 using OpenTelemetry.Logs;
 
@@ -34,7 +33,6 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     db.Database.Migrate();
-    DatabaseSeed.Apply(db);
 }
 
 startup.Configure(app, app.Environment);

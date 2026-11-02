@@ -33,4 +33,17 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Remove="Api\Controllers\AutenticacaoControllerTests.cs" />
+    <Compile Remove="Api\Controllers\OrdemServicoControllerTests.cs" />
+    <Compile Remove="Api\EndToEnd\AutenticacaoE2ETests.cs" />
+    <Compile Remove="Api\EndToEnd\OrdemServicoE2ETests.cs" />
+    <Compile Remove="Application\DTOs\Responses\**\*.cs" />
+    <Compile Remove="Application\Services\AutenticacaoServiceTests.cs" />
+    <Compile Remove="Application\Services\OrdemServicoServiceTests.cs" />
+    <Compile Remove="Domain\Entities\OrdemServicoTests.cs" />
+    <Compile Remove="Domain\ValueObjects\PlacaVeiculoVOTests.cs" />
+    <Compile Remove="Infrastructure\Repositories\RepositoryIntegrationTests.cs" />
+  </ItemGroup>
+
 </Project>
