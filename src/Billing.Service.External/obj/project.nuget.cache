@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "ZCEtEOc2cNQ=",
+  "dgSpecHash": "4o0yH1+7mMA=",
   "success": true,
   "projectFilePath": "/Users/Di/Pós - Software Architect/billing-service/src/Billing.Service.External/Billing.Service.External.csproj",
   "expectedPackageFiles": [
@@ -17,12 +17,7 @@
     "/Users/Di/.nuget/packages/microsoft.extensions.options/10.0.6/microsoft.extensions.options.10.0.6.nupkg.sha512",
     "/Users/Di/.nuget/packages/microsoft.extensions.options.configurationextensions/10.0.6/microsoft.extensions.options.configurationextensions.10.0.6.nupkg.sha512",
     "/Users/Di/.nuget/packages/microsoft.extensions.primitives/10.0.6/microsoft.extensions.primitives.10.0.6.nupkg.sha512",
-    "/Users/Di/.nuget/packages/microsoft.identitymodel.abstractions/8.17.0/microsoft.identitymodel.abstractions.8.17.0.nupkg.sha512",
-    "/Users/Di/.nuget/packages/microsoft.identitymodel.jsonwebtokens/8.17.0/microsoft.identitymodel.jsonwebtokens.8.17.0.nupkg.sha512",
-    "/Users/Di/.nuget/packages/microsoft.identitymodel.logging/8.17.0/microsoft.identitymodel.logging.8.17.0.nupkg.sha512",
-    "/Users/Di/.nuget/packages/microsoft.identitymodel.tokens/8.17.0/microsoft.identitymodel.tokens.8.17.0.nupkg.sha512",
     "/Users/Di/.nuget/packages/system.diagnostics.diagnosticsource/10.0.6/system.diagnostics.diagnosticsource.10.0.6.nupkg.sha512",
-    "/Users/Di/.nuget/packages/system.identitymodel.tokens.jwt/8.17.0/system.identitymodel.tokens.jwt.8.17.0.nupkg.sha512",
     "/Users/Di/.nuget/packages/microsoft.netcore.app.ref/8.0.28/microsoft.netcore.app.ref.8.0.28.nupkg.sha512",
     "/Users/Di/.nuget/packages/microsoft.aspnetcore.app.ref/8.0.28/microsoft.aspnetcore.app.ref.8.0.28.nupkg.sha512"
   ],

@@ -1,7 +1,0 @@
-{
-  "Billing.Service.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "\/Users\/Di\/Pós - Software Architect\/billing-service\/src\/Billing.Service.Api",
-  "Billing.Service.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "\/Users\/Di\/Pós - Software Architect\/billing-service\/src\/Billing.Service.Application",
-  "Billing.Service.Domain, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "\/Users\/Di\/Pós - Software Architect\/billing-service\/src\/Billing.Service.Domain",
-  "Billing.Service.External, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "\/Users\/Di\/Pós - Software Architect\/billing-service\/src\/Billing.Service.External",
-  "Billing.Service.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "\/Users\/Di\/Pós - Software Architect\/billing-service\/src\/Billing.Service.Infrastructure"
-}

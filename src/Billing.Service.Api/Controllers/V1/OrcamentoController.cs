@@ -20,7 +20,7 @@ namespace Billing.Service.Api.Controllers.V1
             return Ok(orcamento);
         }
 
-        [HttpGet]
+        [HttpGet("{idOrcamento:guid}")]
         public async Task<IActionResult> BuscarOrcamento(Guid idOrcamento)
         {
             var orcamento = await _orcamentoService.BuscarOrcamento(idOrcamento);
@@ -28,7 +28,7 @@ namespace Billing.Service.Api.Controllers.V1
             return Ok(orcamento);
         }
 
-        [HttpGet]
+        [HttpGet("listar")]
         public async Task<IActionResult> BuscarTodosOrcamentos(PagedRequest pagedRequest)
         {
             var orcamentos = await _orcamentoService.BuscarTodosOrcamentos(pagedRequest.Page, pagedRequest.PageSize);

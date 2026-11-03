@@ -5,6 +5,16 @@ using OpenTelemetry.Logs;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+if (string.IsNullOrWhiteSpace(connectionString) ||
+    connectionString.Contains("PLACEHOLDER", StringComparison.OrdinalIgnoreCase) ||
+    connectionString.Contains('*'))
+{
+    builder.Configuration["ConnectionStrings:DefaultConnection"] =
+        Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
+        ?? "Host=localhost;Port=5432;Database=techchallengedb;Username=postgres;Password=postgres";
+}
+
 builder.Logging.ClearProviders();
 builder.Logging.AddJsonConsole(options =>
 {

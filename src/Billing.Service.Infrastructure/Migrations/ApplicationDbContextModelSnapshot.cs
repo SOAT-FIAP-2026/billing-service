@@ -57,6 +57,82 @@ namespace Billing.Service.Infrastructure.Migrations
                     b.ToTable("orcamento", (string)null);
                 });
 
+            modelBuilder.Entity("Billing.Service.Domain.Entities.Pagamento", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime?>("ApagadoEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("apagado_em");
+
+                    b.Property<DateTime>("AtualizadoEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("atualizado_em");
+
+                    b.Property<string>("BoletoUrl")
+                        .HasColumnType("text")
+                        .HasColumnName("boleto_url");
+
+                    b.Property<string>("CodigoBarras")
+                        .HasColumnType("text")
+                        .HasColumnName("codigo_barras");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("criado_em");
+
+                    b.Property<DateTimeOffset?>("DataVencimento")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("data_vencimento");
+
+                    b.Property<string>("DetalheStatus")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("detalhe_status");
+
+                    b.Property<string>("IdMercadoPago")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("id_mercado_pago");
+
+                    b.Property<Guid>("IdOrcamento")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id_orcamento");
+
+                    b.Property<string>("MeioPagamento")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("meio_pagamento");
+
+                    b.Property<string>("ReferenciaExterna")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("referencia_externa");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("status");
+
+                    b.Property<decimal>("Valor")
+                        .HasColumnType("decimal(10,2)")
+                        .HasColumnName("valor");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IdMercadoPago")
+                        .IsUnique();
+
+                    b.HasIndex("IdOrcamento");
+
+                    b.ToTable("pagamento", (string)null);
+                });
 #pragma warning restore 612, 618
         }
     }

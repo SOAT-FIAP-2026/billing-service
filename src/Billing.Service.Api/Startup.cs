@@ -14,7 +14,6 @@ namespace Billing.Service.Api
             services.AddControllers();
 
             services.AddDependencyInjection(Configuration);
-            services.AddJWTConfig(Configuration);
             services.AddSwaggerConfig();
             services.AddObservability(Configuration);
         }
@@ -35,8 +34,6 @@ namespace Billing.Service.Api
 
             app.UseRouting();
 
-            app.UseAuthentication();
-            app.UseAuthorization();
             app.MapControllers();
 
             app.MapHealthChecks("/health", new HealthCheckOptions

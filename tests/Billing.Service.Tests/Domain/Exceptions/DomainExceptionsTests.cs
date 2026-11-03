@@ -5,35 +5,6 @@ namespace Billing.Service.Tests.Domain.Exceptions
     public class DomainExceptionsTests
     {
         [Fact]
-        public void UsuarioNaoEncontradoException_DeveHerdaDomainExceptionEDefinirMensagem()
-        {
-            var login = "usuario.teste";
-
-            var exception = new UsuarioNaoEncontradoException(login);
-
-            Assert.IsAssignableFrom<DomainException>(exception);
-            Assert.Equal($"Usuário com login '{login}' não encontrado.", exception.Message);
-        }
-
-        [Fact]
-        public void CredenciaisInvalidasException_DeveHerdaDomainExceptionEDefinirMensagem()
-        {
-            var exception = new CredenciaisInvalidasException();
-
-            Assert.IsAssignableFrom<DomainException>(exception);
-            Assert.Equal("Usuário ou senha inválidos.", exception.Message);
-        }
-
-        [Fact]
-        public void ErroGerarTokenException_DeveHerdaDomainExceptionEDefinirMensagem()
-        {
-            var exception = new ErroGerarTokenException();
-
-            Assert.IsAssignableFrom<DomainException>(exception);
-            Assert.Equal("Erro ao gerar token de autenticação.", exception.Message);
-        }
-
-        [Fact]
         public void OrdemServicoNaoEncontradaException_DeveHerdaDomainExceptionEDefinirMensagem()
         {
             var id = Guid.NewGuid();

@@ -12,13 +12,10 @@
   <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="6.0.0" />
     <PackageReference Include="FluentAssertions" Version="8.9.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.26" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
     <PackageReference Include="Moq" Version="4.20.72" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.11" />
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
     <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
-    <PackageReference Include="Testcontainers.PostgreSql" Version="4.13.0" />
     <PackageReference Include="xunit" Version="2.5.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
   </ItemGroup>
@@ -34,16 +31,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="Api\Controllers\AutenticacaoControllerTests.cs" />
-    <Compile Remove="Api\Controllers\OrdemServicoControllerTests.cs" />
-    <Compile Remove="Api\EndToEnd\AutenticacaoE2ETests.cs" />
-    <Compile Remove="Api\EndToEnd\OrdemServicoE2ETests.cs" />
-    <Compile Remove="Application\DTOs\Responses\**\*.cs" />
-    <Compile Remove="Application\Services\AutenticacaoServiceTests.cs" />
-    <Compile Remove="Application\Services\OrdemServicoServiceTests.cs" />
-    <Compile Remove="Domain\Entities\OrdemServicoTests.cs" />
     <Compile Remove="Domain\ValueObjects\PlacaVeiculoVOTests.cs" />
-    <Compile Remove="Infrastructure\Repositories\RepositoryIntegrationTests.cs" />
   </ItemGroup>
 
 </Project>

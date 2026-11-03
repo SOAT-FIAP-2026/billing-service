@@ -7,44 +7,10 @@ namespace Billing.Service.Domain.Exceptions
     {
     }
 
-    /// <summary>
-    /// Exceção lançada quando um email já existe no sistema.
-    /// </summary>
-    public class EmailJaExisteException(string email) : DomainException($"O email '{email}' já está cadastrado no sistema.")
-    {
-    }
-
-    /// <summary>
-    /// Exceção lançada quando um usuário não é encontrado.
-    /// </summary>
-    public class UsuarioNaoEncontradoException : DomainException
-    {
-        public UsuarioNaoEncontradoException(string login) 
-            : base($"Usuário com login '{login}' não encontrado.") { }
-    }
-
     public class OrcamentoNaoEncontradoException : DomainException
     {
         public OrcamentoNaoEncontradoException(Guid id) 
             : base($"Orçamento com ID '{id}' não encontrado.") { }
-    }
-
-    /// <summary>
-    /// Exceção lançada quando as credenciais são inválidas.
-    /// </summary>
-    public class CredenciaisInvalidasException : DomainException
-    {
-        public CredenciaisInvalidasException() 
-            : base("Usuário ou senha inválidos.") { }
-    }
-
-    /// <summary>
-    /// Exceção lançada quando ocorre erro ao gerar token.
-    /// </summary>
-    public class ErroGerarTokenException : DomainException
-    {
-        public ErroGerarTokenException() 
-            : base("Erro ao gerar token de autenticação.") { }
     }
 
     /// <summary>

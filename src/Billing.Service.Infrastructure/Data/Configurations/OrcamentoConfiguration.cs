@@ -14,6 +14,7 @@ namespace Billing.Service.Infrastructure.Data.Configurations
             builder.Property(o => o.Id).HasColumnName("id");
 
             builder.Property(o => o.IdOrdemServico).HasColumnName("id_ordem_servico").IsRequired();
+            builder.Ignore(o => o.IdOrcamento);
 
             builder.Property(o => o.ValorTotal)
                 .HasConversion(v => v.Valor, v => new ValorMonetarioVO(v))

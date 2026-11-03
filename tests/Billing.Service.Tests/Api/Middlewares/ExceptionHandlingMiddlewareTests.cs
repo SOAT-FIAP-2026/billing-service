@@ -25,8 +25,8 @@ namespace Billing.Service.Tests.Api.Middlewares
         public async Task InvokeAsync_QuandoDomainExceptionLancada_DeveRetornarBadRequest()
         {
             // Arrange
-            var email = "teste@email.com";
-            RequestDelegate next = (innerContext) => throw new EmailJaExisteException(email);
+            var id = Guid.NewGuid();
+            RequestDelegate next = (innerContext) => throw new OrcamentoNaoEncontradoException(id);
             var middleware = new ExceptionHandlingMiddleware(next, _loggerMock.Object);
 
             // Act
@@ -41,7 +41,7 @@ namespace Billing.Service.Tests.Api.Middlewares
                 PropertyNameCaseInsensitive = true
             });
 
-            data!["message"].ToString().Should().Be($"O email '{email}' já está cadastrado no sistema.");
+            data!["message"].ToString().Should().Be($"Orçamento com ID '{id}' não encontrado.");
         }
 
         [Fact]

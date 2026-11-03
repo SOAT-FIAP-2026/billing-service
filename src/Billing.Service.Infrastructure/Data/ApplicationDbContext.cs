@@ -7,6 +7,7 @@ namespace Billing.Service.Infrastructure.Data
     public class ApplicationDbContext : DbContext
     {
         public DbSet<Orcamento> Orcamentos => Set<Orcamento>();
+        public DbSet<Pagamento> Pagamentos => Set<Pagamento>();
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options) { }
