@@ -13,6 +13,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Billing.Service.Domain\Billing.Service.Domain.csproj" />
     <ProjectReference Include="..\Billing.Service.Infrastructure\Billing.Service.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\..\shared\src\Fiap.TechChallenge.Contracts\Fiap.TechChallenge.Contracts.csproj" />
   </ItemGroup>
 
 </Project>

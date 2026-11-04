@@ -1,4 +1,4 @@
-using Billing.Service.Application.DTOs.Requests;
+using Fiap.TechChallenge.Contracts.BillingService;
 using Billing.Service.Application.Services;
 using Billing.Service.Domain.Entities;
 using Billing.Service.Domain.Interfaces.Repository;

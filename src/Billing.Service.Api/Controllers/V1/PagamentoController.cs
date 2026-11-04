@@ -1,5 +1,4 @@
-using Billing.Service.Application.DTOs.Requests;
-using Billing.Service.Application.DTOs.Responses;
+using Fiap.TechChallenge.Contracts.BillingService;
 using Billing.Service.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Cryptography;

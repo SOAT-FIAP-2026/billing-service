@@ -1,6 +1,5 @@
 using System.ComponentModel;
 using System.IO;
-using Billing.Service.Application.DTOs.Requests;
 using Billing.Service.Application.Interfaces;
 using Billing.Service.Domain.Entities;
 using Billing.Service.Domain.Exceptions;

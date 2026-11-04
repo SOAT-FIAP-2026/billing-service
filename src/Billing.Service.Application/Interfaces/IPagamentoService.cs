@@ -1,5 +1,4 @@
-using Billing.Service.Application.DTOs.Requests;
-using Billing.Service.Application.DTOs.Responses;
+using Fiap.TechChallenge.Contracts.BillingService;
 
 namespace Billing.Service.Application.Interfaces;
 
