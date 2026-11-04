@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -24,6 +24,7 @@
     <ProjectReference Include="..\..\src\Billing.Service.Domain\Billing.Service.Domain.csproj" />
     <ProjectReference Include="..\..\src\Billing.Service.Application\Billing.Service.Application.csproj" />
     <ProjectReference Include="..\..\src\Billing.Service.Api\Billing.Service.Api.csproj" />
+    <ProjectReference Include="..\..\..\shared\src\Fiap.TechChallenge.Contracts\Fiap.TechChallenge.Contracts.csproj" />
   </ItemGroup>
 
   <ItemGroup>

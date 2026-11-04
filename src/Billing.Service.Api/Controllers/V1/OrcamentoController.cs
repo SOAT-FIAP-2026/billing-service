@@ -1,8 +1,9 @@
-using Billing.Service.Application.DTOs.Requests;
+using Billing.Service.Application.DTOs.Common;
 using Billing.Service.Application.Interfaces;
+using Fiap.TechChallenge.Contracts.BillingService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Billing.Service.Application.DTOs.Common;
+using GerarOrcamentoRequest = Billing.Service.Application.DTOs.Requests.GerarOrcamentoRequest;
 
 namespace Billing.Service.Api.Controllers.V1
 {

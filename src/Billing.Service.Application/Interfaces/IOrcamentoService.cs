@@ -1,4 +1,3 @@
-using Billing.Service.Application.DTOs.Requests;
 using Billing.Service.Domain.Entities;
 
 namespace Billing.Service.Application.Interfaces
