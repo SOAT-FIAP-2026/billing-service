@@ -21,7 +21,7 @@ jobs:
       - name: Checkout Shared Contracts
         uses: actions/checkout@v4
         with:
-          repository: https://github.com/SOAT-FIAP-2026/shared
+          repository: SOAT-FIAP-2026/shared
           path: ../shared 
           token: ${{ secrets.GH_PAT }}
 
