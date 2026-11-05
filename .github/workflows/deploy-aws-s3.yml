@@ -17,14 +17,14 @@ jobs:
     steps:
       - name: Checkout Billing Service
         uses: actions/checkout@v4
-
+        with:
+          path: billing-service
+      
       - name: Checkout Shared Contracts
         uses: actions/checkout@v4
         with:
           repository: SOAT-FIAP-2026/shared
-          path: ../shared 
-          token: ${{ secrets.GH_PAT }}
-
+          path: shared
 
       - name: Setup .NET 8
         uses: actions/setup-dotnet@v4
@@ -32,9 +32,8 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Publish API
-        # Usa linux-x64. Se o seu Lambda for arm64, mude para linux-arm64
         run: |
-          dotnet publish src/Billing.Service.Api/Billing.Service.Api.csproj \
+          dotnet publish billing-service/src/Billing.Service.Api/Billing.Service.Api.csproj \
             -c Release \
             -r linux-x64 \
             --self-contained false \
