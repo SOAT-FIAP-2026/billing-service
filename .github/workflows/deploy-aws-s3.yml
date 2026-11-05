@@ -15,8 +15,16 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
+      - name: Checkout Billing Service
         uses: actions/checkout@v4
+
+      - name: Checkout Shared Contracts
+        uses: actions/checkout@v4
+        with:
+          repository: https://github.com/SOAT-FIAP-2026/shared
+          path: ../shared 
+          token: ${{ secrets.GH_PAT }}
+
 
       - name: Setup .NET 8
         uses: actions/setup-dotnet@v4
