@@ -5,7 +5,11 @@ on:
     branches:
       - main
     paths:
-      - 'src/Billing.Service.Api/**' # Ajuste para o caminho real da sua API
+      - 'src/Billing.Service.Api/**'
+      - 'src/Billing.Service.Domain/**'
+      - 'src/Billing.Service.Application/**'
+      - 'src/Billing.Service.Infrastructure/**'
+      - 'src/Billing.Service.External/**'
 
 jobs:
   deploy:
