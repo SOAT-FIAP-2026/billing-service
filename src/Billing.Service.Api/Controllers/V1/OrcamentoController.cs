@@ -3,8 +3,6 @@ using Billing.Service.Application.Interfaces;
 using Fiap.TechChallenge.Contracts.BillingService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using GerarOrcamentoRequest = Billing.Service.Application.DTOs.Requests.GerarOrcamentoRequest;
-
 namespace Billing.Service.Api.Controllers.V1
 {
     [ApiController]
@@ -14,17 +12,24 @@ namespace Billing.Service.Api.Controllers.V1
         private readonly IOrcamentoService _orcamentoService = orcamentoService;
 
         [HttpPost]
-        public async Task<IActionResult> GerarOrcamento(Guid idOrdemServico, [FromBody] GerarOrcamentoRequest request)
+        public async Task<IActionResult> GerarOrcamento(
+            [FromQuery] Guid? idOrdemServico,
+            [FromBody] GerarOrcamentoRequest request,
+            CancellationToken cancellationToken)
         {
-            var orcamento = await _orcamentoService.GerarOrcamento(idOrdemServico, request.Servicos, request.PecasInsumo);
+            var osId = (idOrdemServico.HasValue && idOrdemServico.Value != Guid.Empty)
+                ? idOrdemServico.Value
+                : Guid.NewGuid();
+
+            var orcamento = await _orcamentoService.GerarOrcamento(osId, request.Servicos, request.PecasInsumo, cancellationToken);
 
             return Ok(orcamento);
         }
 
-        [HttpGet("{idOrcamento:guid}")]
-        public async Task<IActionResult> BuscarOrcamento(Guid idOrcamento)
+        [HttpGet("{id:guid}")]
+        public async Task<IActionResult> BuscarOrcamento(Guid id)
         {
-            var orcamento = await _orcamentoService.BuscarOrcamento(idOrcamento);
+            var orcamento = await _orcamentoService.BuscarOrcamento(id);
 
             return Ok(orcamento);
         }
@@ -38,9 +43,9 @@ namespace Billing.Service.Api.Controllers.V1
         }
 
         [HttpPost("{id:guid}/enviar-orcamento")]
-        public async Task<IActionResult> EnviarOrcamento(Guid idOrcamento, [FromBody] EnviarOrcamentoRequest request)
+        public async Task<IActionResult> EnviarOrcamento(Guid id, [FromBody] EnviarOrcamentoRequest request)
         {
-            string resultado = await _orcamentoService.EnviarOrcamento(idOrcamento, request.EmailCliente);
+            string resultado = await _orcamentoService.EnviarOrcamento(id, request.EmailCliente);
 
             return Ok(resultado);
         }

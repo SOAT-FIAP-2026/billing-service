@@ -10,24 +10,53 @@ namespace Billing.Service.External.Services;
 public sealed class MercadoPagoClient : IMercadoPagoClient
 {
     private readonly HttpClient _httpClient;
+    private readonly bool _isMock;
+
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, MercadoPagoBoletoResponse> MockPayments = new();
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, string> MockStatusOverrides = new();
+
+    public static void SetMockStatus(string paymentId, string status)
+    {
+        MockStatusOverrides[paymentId] = status;
+    }
 
     public MercadoPagoClient(HttpClient httpClient, IConfiguration configuration)
     {
         _httpClient = httpClient;
         var accessToken = configuration["MercadoPago:AccessToken"];
 
-        if (string.IsNullOrWhiteSpace(accessToken))
-            throw new InvalidOperationException("MercadoPago:AccessToken não configurado.");
+        _isMock = string.IsNullOrWhiteSpace(accessToken) ||
+                  accessToken.Equals("mock", StringComparison.OrdinalIgnoreCase) ||
+                  accessToken.Equals("test", StringComparison.OrdinalIgnoreCase) ||
+                  accessToken.Equals("offline", StringComparison.OrdinalIgnoreCase);
 
-        _httpClient.BaseAddress ??= new Uri("https://api.mercadopago.com/");
-        _httpClient.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", accessToken);
+        if (!_isMock)
+        {
+            _httpClient.BaseAddress ??= new Uri("https://api.mercadopago.com/");
+            _httpClient.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("Bearer", accessToken);
+        }
     }
 
     public async Task<MercadoPagoBoletoResponse> CriarBoletoAsync(
         MercadoPagoBoletoRequest request,
         CancellationToken cancellationToken)
     {
+        if (_isMock)
+        {
+            var paymentId = $"{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}{Random.Shared.Next(100, 999)}-{Guid.NewGuid().ToString("N")[..6]}";
+            var boletoResponse = new MercadoPagoBoletoResponse(
+                paymentId,
+                "pending",
+                "pending_waiting_payment",
+                $"https://mercadopago.fake/boleto/{paymentId}",
+                "341917900101043510047910201500098910000012000",
+                DateTimeOffset.UtcNow.AddDays(3));
+
+            MockPayments[paymentId] = boletoResponse;
+            return boletoResponse;
+        }
+
         var payload = new CriarPagamentoRequest(
             request.Valor,
             request.Descricao,
@@ -53,6 +82,55 @@ public sealed class MercadoPagoClient : IMercadoPagoClient
         string paymentId,
         CancellationToken cancellationToken)
     {
+        if (_isMock)
+        {
+            string status;
+            string statusDetail;
+
+            if (MockStatusOverrides.TryGetValue(paymentId, out var customStatus))
+            {
+                status = customStatus.ToLowerInvariant();
+                statusDetail = status switch
+                {
+                    "approved" or "aprovado" => "accredited",
+                    "rejected" or "rejeitado" => "rejected_by_bank",
+                    "cancelled" or "cancelado" => "cancelled",
+                    "expired" or "expirado" => "expired",
+                    _ => status
+                };
+            }
+            else if (paymentId.Contains("rej", StringComparison.OrdinalIgnoreCase) ||
+                     paymentId.Contains("recus", StringComparison.OrdinalIgnoreCase) ||
+                     paymentId.Contains("cancel", StringComparison.OrdinalIgnoreCase) ||
+                     paymentId.Contains("fail", StringComparison.OrdinalIgnoreCase))
+            {
+                status = "rejected";
+                statusDetail = "rejected_by_bank";
+            }
+            else if (paymentId.Contains("expir", StringComparison.OrdinalIgnoreCase))
+            {
+                status = "expired";
+                statusDetail = "expired";
+            }
+            else
+            {
+                status = "approved";
+                statusDetail = "accredited";
+            }
+
+            MockPayments.TryGetValue(paymentId, out var existing);
+
+            var response = new MercadoPagoBoletoResponse(
+                paymentId,
+                status,
+                statusDetail,
+                existing?.BoletoUrl ?? $"https://mercadopago.fake/boleto/{paymentId}",
+                existing?.CodigoBarras ?? "341917900101043510047910201500098910000012000",
+                existing?.DataVencimento ?? DateTimeOffset.UtcNow.AddDays(3));
+
+            return response;
+        }
+
         using var httpResponse = await _httpClient.GetAsync(
             $"v1/payments/{Uri.EscapeDataString(paymentId)}",
             cancellationToken);

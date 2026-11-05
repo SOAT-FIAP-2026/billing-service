@@ -184,14 +184,37 @@ public class MercadoPagoClientTests
     }
 
     [Fact]
-    public void Construtor_SemToken_DeveLancarInvalidOperationException()
+    public void Construtor_SemToken_NaoDeveLancarExcecaoEAtivarModoMock()
     {
         var configuration = new ConfigurationBuilder().Build();
 
-        var exception = Assert.Throws<InvalidOperationException>(() =>
-            new MercadoPagoClient(new HttpClient(), configuration));
+        var client = new MercadoPagoClient(new HttpClient(), configuration);
 
-        Assert.Equal("MercadoPago:AccessToken não configurado.", exception.Message);
+        Assert.NotNull(client);
+    }
+
+    [Fact]
+    public async Task CriarBoletoAsync_EmModoMock_DeveRetornarRespostaDeterministica()
+    {
+        var configuration = new ConfigurationBuilder().Build();
+        var client = new MercadoPagoClient(new HttpClient(), configuration);
+
+        var request = new MercadoPagoBoletoRequest(
+            150.0m,
+            "Teste mock",
+            "ref-123",
+            "cliente@teste.com",
+            "Nome",
+            "Sobrenome",
+            "12345678901",
+            null);
+
+        var response = await client.CriarBoletoAsync(request, CancellationToken.None);
+
+        Assert.NotNull(response);
+        Assert.Equal("pending", response.Status);
+        Assert.NotEmpty(response.Id);
+        Assert.NotNull(response.BoletoUrl);
     }
 
     [Fact]

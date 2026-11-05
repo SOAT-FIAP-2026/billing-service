@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Billing.Service.Infrastructure.Migrations
 {
@@ -22,12 +22,6 @@ namespace Billing.Service.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_orcamento", x => x.id);
-                    table.ForeignKey(
-                        name: "FK_orcamento_ordem_servico_id_ordem_servico",
-                        column: x => x.id_ordem_servico,
-                        principalTable: "ordem_servico",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(

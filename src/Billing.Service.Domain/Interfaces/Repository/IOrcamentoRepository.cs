@@ -7,6 +7,7 @@ namespace Billing.Service.Domain.Interfaces.Repository
         Task Adicionar(Orcamento orcamento);
         Task Atualizar(Orcamento orcamento);
         Task<Orcamento?> ObterPorId(Guid id);
+        Task<Orcamento?> ObterPorOrdemServicoId(Guid idOrdemServico);
         Task<IReadOnlyCollection<Orcamento>> ObterTodos(int page, int pageSize);
     }
 }

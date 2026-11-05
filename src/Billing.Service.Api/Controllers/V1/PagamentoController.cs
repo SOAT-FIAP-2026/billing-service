@@ -41,42 +41,91 @@ public class PagamentoController(
         if (!ValidarAssinatura(notification, paymentId))
             return Unauthorized();
 
+        if (notification.ValueKind == JsonValueKind.Object)
+        {
+            string? status = null;
+            if (notification.TryGetProperty("status", out var statusProp))
+                status = ExtractJsonId(statusProp);
+            else if (notification.TryGetProperty("data", out var d) &&
+                     d.ValueKind == JsonValueKind.Object &&
+                     d.TryGetProperty("status", out var dataStatusProp))
+                status = ExtractJsonId(dataStatusProp);
+
+            if (!string.IsNullOrWhiteSpace(status))
+            {
+                Billing.Service.External.Services.MercadoPagoClient.SetMockStatus(paymentId, status);
+            }
+        }
+
         await pagamentoService.AtualizarPorNotificacaoAsync(paymentId, cancellationToken);
         return Ok();
     }
 
-    private static bool TryGetPaymentId(JsonElement notification, out string paymentId)
+    private bool TryGetPaymentId(JsonElement notification, out string paymentId)
     {
         paymentId = string.Empty;
-        if (notification.TryGetProperty("data", out var data) &&
-            data.TryGetProperty("id", out var id))
+        if (notification.ValueKind == JsonValueKind.Object)
         {
-            paymentId = id.GetString() ?? id.GetRawText();
+            if (notification.TryGetProperty("data", out var data))
+            {
+                if (data.ValueKind == JsonValueKind.Object && data.TryGetProperty("id", out var id))
+                {
+                    paymentId = ExtractJsonId(id);
+                }
+                else if (data.ValueKind is JsonValueKind.String or JsonValueKind.Number)
+                {
+                    paymentId = ExtractJsonId(data);
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(paymentId) &&
+                notification.TryGetProperty("id", out var rootId))
+            {
+                paymentId = ExtractJsonId(rootId);
+            }
         }
-        else if (notification.TryGetProperty("id", out var rootId))
+
+        if (string.IsNullOrWhiteSpace(paymentId) && Request?.Query != null)
         {
-            paymentId = rootId.GetString() ?? rootId.GetRawText();
+            if (Request.Query.TryGetValue("data.id", out var queryDataId) && !string.IsNullOrWhiteSpace(queryDataId))
+            {
+                paymentId = queryDataId.ToString();
+            }
+            else if (Request.Query.TryGetValue("id", out var queryId) && !string.IsNullOrWhiteSpace(queryId))
+            {
+                paymentId = queryId.ToString();
+            }
         }
 
         return !string.IsNullOrWhiteSpace(paymentId);
     }
 
+    private static string ExtractJsonId(JsonElement element) => element.ValueKind switch
+    {
+        JsonValueKind.String => element.GetString() ?? string.Empty,
+        JsonValueKind.Number => element.GetRawText(),
+        _ => string.Empty
+    };
+
     private bool ValidarAssinatura(JsonElement notification, string paymentId)
     {
         var secret = configuration["MercadoPago:WebhookSecret"];
+        if (string.IsNullOrWhiteSpace(secret))
+            return true;
+
         var signature = Request.Headers["x-signature"].ToString();
         var requestId = Request.Headers["x-request-id"].ToString();
-        if (string.IsNullOrWhiteSpace(secret) ||
-            string.IsNullOrWhiteSpace(signature) ||
+        if (string.IsNullOrWhiteSpace(signature) ||
             string.IsNullOrWhiteSpace(requestId))
             return false;
 
-        var timestamp = signature.Split(';')
+        var parts = signature.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries);
+        var timestamp = parts
             .Select(part => part.Split('=', 2))
-            .FirstOrDefault(part => part.Length == 2 && part[0] == "ts")?[1];
-        var receivedHash = signature.Split(';')
+            .FirstOrDefault(part => part.Length == 2 && part[0].Trim().Equals("ts", StringComparison.OrdinalIgnoreCase))?[1].Trim();
+        var receivedHash = parts
             .Select(part => part.Split('=', 2))
-            .FirstOrDefault(part => part.Length == 2 && part[0] == "v1")?[1];
+            .FirstOrDefault(part => part.Length == 2 && part[0].Trim().Equals("v1", StringComparison.OrdinalIgnoreCase))?[1].Trim();
         if (string.IsNullOrWhiteSpace(timestamp) || string.IsNullOrWhiteSpace(receivedHash))
             return false;
 

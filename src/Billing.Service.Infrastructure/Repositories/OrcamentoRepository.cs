@@ -27,6 +27,12 @@ namespace Billing.Service.Infrastructure.Repositories
                 .FirstOrDefaultAsync(o => o.Id == id);
         }
 
+        public async Task<Orcamento?> ObterPorOrdemServicoId(Guid idOrdemServico)
+        {
+            return await _context.Orcamentos
+                .FirstOrDefaultAsync(o => o.IdOrdemServico == idOrdemServico);
+        }
+
         public async Task<IReadOnlyCollection<Orcamento>> ObterTodos(int page, int pageSize)
         {
             return await _context.Orcamentos

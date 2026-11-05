@@ -7,6 +7,9 @@ using Billing.Service.Domain.Interfaces.Repository;
 using Billing.Service.Domain.Interfaces.Service;
 using Billing.Service.Domain.Interfaces.Observability;
 using Billing.Service.Domain.ValueObjects;
+using Fiap.TechChallenge.Contracts.BillingService;
+using Fiap.TechChallenge.Contracts.Events;
+using Microsoft.Extensions.Logging;
 
 namespace Billing.Service.Application.Services
 {
@@ -15,24 +18,101 @@ namespace Billing.Service.Application.Services
         private readonly IOrcamentoRepository _orcamentoRepository;
         private readonly IEmailService _emailService;
         private readonly IObservabilityMetrics? _observabilityMetrics;
+        private readonly IBillingEventPublisher? _eventPublisher;
+        private readonly ILogger<OrcamentoService>? _logger;
 
         public OrcamentoService(
             IOrcamentoRepository orcamentoRepository,
             IEmailService emailService,
-            IObservabilityMetrics? observabilityMetrics = null)
+            IObservabilityMetrics? observabilityMetrics = null,
+            IBillingEventPublisher? eventPublisher = null,
+            ILogger<OrcamentoService>? logger = null)
         {
             _orcamentoRepository = orcamentoRepository;
             _emailService = emailService;
             _observabilityMetrics = observabilityMetrics;
+            _eventPublisher = eventPublisher;
+            _logger = logger;
+        }
+
+        public async Task<Orcamento> GerarOrcamento(
+            Guid idOrdemServico,
+            IReadOnlyCollection<ItemCalculoOrcamentoDto> servicos,
+            IReadOnlyCollection<ItemCalculoOrcamentoDto> pecasInsumo,
+            CancellationToken cancellationToken = default)
+        {
+            var orcamento = await _orcamentoRepository.ObterPorOrdemServicoId(idOrdemServico);
+            if (orcamento == null)
+            {
+                orcamento = new Orcamento(idOrdemServico, 0);
+                orcamento.CalcularOrcamento(servicos, pecasInsumo);
+                await _orcamentoRepository.Adicionar(orcamento);
+            }
+            else
+            {
+                orcamento.CalcularOrcamento(servicos, pecasInsumo);
+                await _orcamentoRepository.Atualizar(orcamento);
+            }
+
+            if (_eventPublisher != null)
+            {
+                var evento = new OrcamentoGeradoEvent
+                {
+                    OsId = orcamento.IdOrdemServico,
+                    OrcamentoId = orcamento.Id,
+                    ValorTotal = orcamento.ValorTotal.Valor,
+                    LinkPagamento = $"http://localhost:8081/api/v1/pagamento/checkout/{orcamento.Id}",
+                    QrCodePix = null
+                };
+
+                try
+                {
+                    await _eventPublisher.PublishAsync(evento, cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    _logger?.LogWarning(ex, "Falha ao publicar OrcamentoGeradoEvent para OS {OsId}", orcamento.IdOrdemServico);
+                }
+            }
+
+            return orcamento;
         }
 
         public async Task<Orcamento> GerarOrcamento(Guid idOrdemServico, IReadOnlyCollection<Servico> servicos, IReadOnlyCollection<PecaInsumo> pecasInsumo)
         {
-            var orcamento = new Orcamento(idOrdemServico, Guid.NewGuid(), 0);
+            var orcamento = await _orcamentoRepository.ObterPorOrdemServicoId(idOrdemServico);
+            if (orcamento == null)
+            {
+                orcamento = new Orcamento(idOrdemServico, 0);
+                orcamento.CalcularOrcamento(servicos, pecasInsumo);
+                await _orcamentoRepository.Adicionar(orcamento);
+            }
+            else
+            {
+                orcamento.CalcularOrcamento(servicos, pecasInsumo);
+                await _orcamentoRepository.Atualizar(orcamento);
+            }
 
-            orcamento.CalcularOrcamento(servicos, pecasInsumo);
+            if (_eventPublisher != null)
+            {
+                var evento = new OrcamentoGeradoEvent
+                {
+                    OsId = orcamento.IdOrdemServico,
+                    OrcamentoId = orcamento.Id,
+                    ValorTotal = orcamento.ValorTotal.Valor,
+                    LinkPagamento = $"http://localhost:8081/api/v1/pagamento/checkout/{orcamento.Id}",
+                    QrCodePix = null
+                };
 
-            await _orcamentoRepository.Adicionar(orcamento);
+                try
+                {
+                    await _eventPublisher.PublishAsync(evento);
+                }
+                catch (Exception ex)
+                {
+                    _logger?.LogWarning(ex, "Falha ao publicar OrcamentoGeradoEvent para OS {OsId}", orcamento.IdOrdemServico);
+                }
+            }
 
             return orcamento;
         }
