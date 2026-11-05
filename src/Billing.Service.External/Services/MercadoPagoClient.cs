@@ -1,5 +1,6 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using Billing.Service.Domain.Interfaces.Service;
 using Microsoft.Extensions.Configuration;
@@ -63,8 +64,13 @@ public sealed class MercadoPagoClient : IMercadoPagoClient
         HttpResponseMessage response,
         CancellationToken cancellationToken)
     {
-        var payment = await response.Content.ReadFromJsonAsync<PagamentoResponse>(
-            cancellationToken: cancellationToken)
+        var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
+        if (string.IsNullOrWhiteSpace(responseContent))
+            throw new InvalidOperationException("Resposta vazia do Mercado Pago.");
+
+        var payment = JsonSerializer.Deserialize<PagamentoResponse>(
+            responseContent,
+            new JsonSerializerOptions(JsonSerializerDefaults.Web))
             ?? throw new InvalidOperationException("Resposta vazia do Mercado Pago.");
 
         return new MercadoPagoBoletoResponse(

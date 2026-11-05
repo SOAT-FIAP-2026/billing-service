@@ -49,9 +49,14 @@ public class MercadoPagoClientTests
     public async Task CriarBoletoAsync_DeveEnviarPayloadCompleto()
     {
         HttpRequestMessage? request = null;
+        Task<string>? payloadRead = null;
         var handler = CriarHandler(
             """{"id":"mp-1","status":"pending","status_detail":"pending"}""",
-            callback: captured => request = captured);
+            callback: captured =>
+            {
+                request = captured;
+                payloadRead = captured.Content!.ReadAsStringAsync();
+            });
         var client = CriarClient(handler);
 
         await client.CriarBoletoAsync(
@@ -71,7 +76,7 @@ public class MercadoPagoClientTests
         Assert.Equal(HttpMethod.Post, request!.Method);
         Assert.Equal("/v1/payments", request.RequestUri!.AbsolutePath);
         Assert.Equal("idem-1", request.Headers.GetValues("X-Idempotency-Key").Single());
-        using var payload = JsonDocument.Parse(await request.Content!.ReadAsStringAsync());
+        using var payload = JsonDocument.Parse(await payloadRead!);
         var root = payload.RootElement;
         Assert.Equal(100.50m, root.GetProperty("transaction_amount").GetDecimal());
         Assert.Equal("Pagamento do orçamento", root.GetProperty("description").GetString());
@@ -128,7 +133,7 @@ public class MercadoPagoClientTests
     public async Task CriarBoletoAsync_QuandoMercadoPagoRetornarErro_DeveLancarHttpRequestException(
         HttpStatusCode statusCode)
     {
-        var handler = CriarHandler("{}", statusCode);
+        var handler = CriarHandler("{}", statusCode: statusCode);
         var client = CriarClient(handler);
 
         await Assert.ThrowsAsync<HttpRequestException>(() =>
@@ -227,7 +232,7 @@ public class MercadoPagoClientTests
         var handler = new Mock<HttpMessageHandler>(MockBehavior.Strict);
         handler.Protected().Setup<Task<HttpResponseMessage>>(
                 "SendAsync",
-                ItExpr.Is<HttpRequestMessage>(request => method is null || request.Method == method),
+                ItExpr.Is<HttpRequestMessage>(request => method == null || request.Method == method),
                 ItExpr.IsAny<CancellationToken>())
             .Callback<HttpRequestMessage, CancellationToken>((request, _) => callback?.Invoke(request))
             .ReturnsAsync(new HttpResponseMessage(statusCode)
