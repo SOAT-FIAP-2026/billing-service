@@ -9,7 +9,7 @@ namespace Billing.Service.Api.Configurations
             services.AddSwaggerGen(c =>
             {
                 // Configuração básica do documento
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "TechChallenge API", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Billing Service", Version = "v1" });
                 });
         }
     }

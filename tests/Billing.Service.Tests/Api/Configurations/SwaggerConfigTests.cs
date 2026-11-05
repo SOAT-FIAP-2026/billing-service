@@ -24,7 +24,7 @@ namespace Billing.Service.Tests.Billing.Service.Api.Configurations
             services.AddSwaggerGen(c =>
                 c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
                 {
-                    Title = "TechChallenge API",
+                    Title = "Billing Service",
                     Version = "v1"
                 }));
 
