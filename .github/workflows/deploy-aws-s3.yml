@@ -62,4 +62,5 @@ jobs:
           aws lambda update-function-code \
             --function-name fiap-billing-service-api \
             --s3-bucket fiap-billing-service-api \
-            --s3-key fiap-billing-service-api/deployment.zip
+            --s3-key deployment.zip
+
