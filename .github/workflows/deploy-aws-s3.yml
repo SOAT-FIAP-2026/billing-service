@@ -1,0 +1,53 @@
+name: Deploy Billing Service to Lambda
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/Billing.Service.Api/**' # Ajuste para o caminho real da sua API
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Publish API
+        # Usa linux-x64. Se o seu Lambda for arm64, mude para linux-arm64
+        run: |
+          dotnet publish src/Billing.Service.Api/Billing.Service.Api.csproj \
+            -c Release \
+            -r linux-x64 \
+            --self-contained false \
+            -o ./publish
+
+      - name: Zip Deployment Package
+        run: |
+          cd publish
+          zip -r ../deployment.zip .
+          cd ..
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Upload Artifact to S3
+        run: |
+          aws s3 cp deployment.zip s3://fiap-billing-service-api/deployment.zip
+
+      - name: Update Lambda Code
+        run: |
+          aws lambda update-function-code \
+            --function-name fiap-billing-service-api \
+            --s3-bucket fiap-billing-service-api \
+            --s3-key fiap-billing-service-api/deployment.zip
