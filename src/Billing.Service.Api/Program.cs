@@ -5,6 +5,8 @@ using OpenTelemetry.Logs;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddAWSLambdaHosting(LambdaEventSource.HttpApi);
+
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 if (string.IsNullOrWhiteSpace(connectionString) ||
     connectionString.Contains("PLACEHOLDER", StringComparison.OrdinalIgnoreCase) ||
