@@ -63,6 +63,8 @@ jobs:
             --function-name fiap-billing-service-api \
             --s3-bucket fiap-billing-service-api \
             --s3-key fiap-billing-service-api/deployment.zip
+          aws lambda wait function-updated \
+            --function-name fiap-billing-service-api
 
       - name: Update Lambda environment
         env:
