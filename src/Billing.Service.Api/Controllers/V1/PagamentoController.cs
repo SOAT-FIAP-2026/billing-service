@@ -36,7 +36,8 @@ public class PagamentoController(
         [FromBody] JsonElement notification,
         CancellationToken cancellationToken)
     {
-        if (!TryGetPaymentId(notification, out var paymentId))
+        if (!TryGetPaymentId(notification, out var paymentId) &&
+            !TryGetPaymentIdFromQuery(out paymentId))
             return BadRequest("Notificação sem payment_id.");
         if (!ValidarAssinatura(notification, paymentId))
             return Unauthorized();
@@ -97,6 +98,12 @@ public class PagamentoController(
             }
         }
 
+        return !string.IsNullOrWhiteSpace(paymentId);
+    }
+
+    private bool TryGetPaymentIdFromQuery(out string paymentId)
+    {
+        paymentId = Request.Query["data.id"].ToString();
         return !string.IsNullOrWhiteSpace(paymentId);
     }
 

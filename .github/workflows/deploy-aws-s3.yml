@@ -62,5 +62,42 @@ jobs:
           aws lambda update-function-code \
             --function-name fiap-billing-service-api \
             --s3-bucket fiap-billing-service-api \
-            --s3-key deployment.zip
+            --s3-key fiap-billing-service-api/deployment.zip
 
+      - name: Update Lambda environment
+        env:
+          MERCADO_PAGO_ACCESS_TOKEN: ${{ secrets.MERCADO_PAGO_ACCESS_TOKEN }}
+          MERCADO_PAGO_WEBHOOK_SECRET: ${{ secrets.MERCADO_PAGO_WEBHOOK_SECRET }}
+          MERCADO_PAGO_NOTIFICATION_URL: https://figg7rtf4l7sqb2t2fsodkq45m0vmtkt.lambda-url.us-east-2.on.aws/api/v1/pagamento/webhook
+        run: |
+          set -euo pipefail
+
+          test -n "$MERCADO_PAGO_ACCESS_TOKEN" || {
+            echo "::error::Secret MERCADO_PAGO_ACCESS_TOKEN não configurado."
+            exit 1
+          }
+          test -n "$MERCADO_PAGO_WEBHOOK_SECRET" || {
+            echo "::error::Secret MERCADO_PAGO_WEBHOOK_SECRET não configurado."
+            exit 1
+          }
+
+          aws lambda get-function-configuration \
+            --function-name fiap-billing-service-api \
+            --query 'Environment.Variables' \
+            --output json > lambda-environment.json
+
+          jq \
+            --arg accessToken "$MERCADO_PAGO_ACCESS_TOKEN" \
+            --arg webhookSecret "$MERCADO_PAGO_WEBHOOK_SECRET" \
+            --arg notificationUrl "$MERCADO_PAGO_NOTIFICATION_URL" \
+            '. + {
+              "MercadoPago__AccessToken": $accessToken,
+              "MercadoPago__WebhookSecret": $webhookSecret,
+              "MercadoPago__NotificationUrl": $notificationUrl
+            } | { "Variables": . }' lambda-environment.json > lambda-environment.updated.json
+
+          aws lambda update-function-configuration \
+            --function-name fiap-billing-service-api \
+            --environment file://lambda-environment.updated.json
+
+          rm -f lambda-environment.json lambda-environment.updated.json

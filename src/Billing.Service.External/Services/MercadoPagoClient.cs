@@ -152,12 +152,26 @@ public sealed class MercadoPagoClient : IMercadoPagoClient
             ?? throw new InvalidOperationException("Resposta vazia do Mercado Pago.");
 
         return new MercadoPagoBoletoResponse(
-            payment.Id.ToString(),
+            GetPaymentId(payment.Id),
             payment.Status ?? "pending",
             payment.StatusDetail ?? "pending",
             payment.TransactionDetails?.ExternalResourceUrl,
             payment.TransactionDetails?.Barcode?.Content,
             payment.DateOfExpiration);
+    }
+
+    private static string GetPaymentId(JsonElement id)
+    {
+        var paymentId = id.ValueKind switch
+        {
+            JsonValueKind.String => id.GetString(),
+            JsonValueKind.Number => id.GetRawText(),
+            _ => null
+        };
+
+        return string.IsNullOrWhiteSpace(paymentId)
+            ? throw new InvalidOperationException("Resposta do Mercado Pago sem id de pagamento.")
+            : paymentId;
     }
 
     private sealed record CriarPagamentoRequest(
@@ -177,7 +191,7 @@ public sealed class MercadoPagoClient : IMercadoPagoClient
     private sealed record IdentificacaoRequest(string Type, string Number);
 
     private sealed record PagamentoResponse(
-        string Id,
+        JsonElement Id,
         string? Status,
         [property: JsonPropertyName("status_detail")] string? StatusDetail,
         [property: JsonPropertyName("date_of_expiration")] DateTimeOffset? DateOfExpiration,

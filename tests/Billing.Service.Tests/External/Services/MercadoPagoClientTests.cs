@@ -184,7 +184,19 @@ public class MercadoPagoClientTests
     }
 
     [Fact]
-    public void Construtor_SemToken_NaoDeveLancarExcecaoEAtivarModoMock()
+    public async Task CriarBoletoAsync_QuandoIdNumerico_DevePreservarIdComoTexto()
+    {
+        var client = CriarClient(CriarHandler("""{"id":123456789,"status":"pending"}"""));
+
+        var response = await client.CriarBoletoAsync(
+            new MercadoPagoBoletoRequest(100m, "desc", "ref", "email", "nome", "sobrenome", "cpf", null),
+            CancellationToken.None);
+
+        Assert.Equal("123456789", response.Id);
+    }
+
+    [Fact]
+    public void Construtor_SemToken_DeveLancarInvalidOperationException()
     {
         var configuration = new ConfigurationBuilder().Build();
 
