@@ -89,38 +89,52 @@ namespace Billing.Service.Infrastructure.Messaging
         private async Task ProcessarMensagemAsync(Message message, CancellationToken stoppingToken)
         {
             var (conteudoJson, tipoEvento) = ExtrairConteudoETipoEvento(message);
+            var sqsAttrs = message.MessageAttributes?.ToDictionary(k => k.Key, v => (string?)v.Value?.StringValue);
+            var osId = SnsCorrelationHelper.ExtractOsId(message.Body, sqsAttrs);
+            var correlationId = SnsCorrelationHelper.ExtractCorrelationId(message.Body, sqsAttrs, osId);
 
-            _logger.LogInformation("Mensagem SQS recebida no billing-service. Tipo: {TipoEvento}", tipoEvento);
-
-            using var scope = _scopeFactory.CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            var publisher = scope.ServiceProvider.GetRequiredService<IBillingEventPublisher>();
-
-            switch (tipoEvento)
+            using (CorrelationContext.Push(correlationId))
+            using (_logger.BeginScope(new Dictionary<string, object?>
             {
-                case nameof(DiagnosticoFinalizadoEvent):
-                case "DiagnosticoFinalizado":
-                    await ProcessarDiagnosticoFinalizadoAsync(conteudoJson, dbContext, publisher, stoppingToken);
-                    break;
+                [CorrelationContext.LogScopeKey] = correlationId,
+                [CorrelationContext.OsIdScopeKey] = osId,
+                ["event_type"] = tipoEvento
+            }))
+            {
+                _logger.LogInformation(
+                    "Mensagem SQS recebida no billing-service. Tipo: {TipoEvento}, CorrelationId: {CorrelationId}",
+                    tipoEvento, correlationId);
 
-                case nameof(DiagnosticoTecnicoConcluidoEvent):
-                case "DiagnosticoTecnicoConcluido":
-                    await ProcessarDiagnosticoTecnicoConcluidoAsync(conteudoJson, dbContext, publisher, stoppingToken);
-                    break;
+                using var scope = _scopeFactory.CreateScope();
+                var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                var publisher = scope.ServiceProvider.GetRequiredService<IBillingEventPublisher>();
 
-                case nameof(ProducaoCanceladaEvent):
-                case "ProducaoCancelada":
-                    await ProcessarProducaoCanceladaAsync(conteudoJson, dbContext, publisher, stoppingToken);
-                    break;
+                switch (tipoEvento)
+                {
+                    case nameof(DiagnosticoFinalizadoEvent):
+                    case "DiagnosticoFinalizado":
+                        await ProcessarDiagnosticoFinalizadoAsync(conteudoJson, dbContext, publisher, stoppingToken);
+                        break;
 
-                case nameof(OrdemServicoCanceladaEvent):
-                case "OrdemServicoCancelada":
-                    await ProcessarOrdemServicoCanceladaAsync(conteudoJson, dbContext, stoppingToken);
-                    break;
+                    case nameof(DiagnosticoTecnicoConcluidoEvent):
+                    case "DiagnosticoTecnicoConcluido":
+                        await ProcessarDiagnosticoTecnicoConcluidoAsync(conteudoJson, dbContext, publisher, stoppingToken);
+                        break;
 
-                default:
-                    _logger.LogDebug("Evento {TipoEvento} ignorado pelo billing-service.", tipoEvento);
-                    break;
+                    case nameof(ProducaoCanceladaEvent):
+                    case "ProducaoCancelada":
+                        await ProcessarProducaoCanceladaAsync(conteudoJson, dbContext, publisher, stoppingToken);
+                        break;
+
+                    case nameof(OrdemServicoCanceladaEvent):
+                    case "OrdemServicoCancelada":
+                        await ProcessarOrdemServicoCanceladaAsync(conteudoJson, dbContext, stoppingToken);
+                        break;
+
+                    default:
+                        _logger.LogDebug("Evento {TipoEvento} ignorado pelo billing-service.", tipoEvento);
+                        break;
+                }
             }
         }
 

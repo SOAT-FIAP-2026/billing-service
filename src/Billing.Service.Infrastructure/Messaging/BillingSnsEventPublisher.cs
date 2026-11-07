@@ -44,7 +44,7 @@ namespace Billing.Service.Infrastructure.Messaging
             if (evento is IntegrationEvent integrationEvent)
             {
                 osIdStr = integrationEvent.OsId.ToString();
-                correlationIdStr = integrationEvent.CorrelationId.ToString();
+                correlationIdStr = integrationEvent.ObterCorrelationId();
             }
             else
             {
@@ -65,8 +65,10 @@ namespace Billing.Service.Infrastructure.Messaging
                 }
             }
 
-            if (string.IsNullOrWhiteSpace(correlationIdStr))
-                correlationIdStr = osIdStr;
+            if (string.IsNullOrWhiteSpace(correlationIdStr) || correlationIdStr == osIdStr)
+            {
+                correlationIdStr = CorrelationContext.Resolve(fallback: string.IsNullOrWhiteSpace(correlationIdStr) ? osIdStr : correlationIdStr);
+            }
 
             var request = new PublishRequest
             {
@@ -90,8 +92,8 @@ namespace Billing.Service.Infrastructure.Messaging
             }
 
             _logger.LogInformation(
-                "Publicando evento {TipoEvento} no SNS ({TopicArn}) para OS {OsId}",
-                tipoEvento, _topicArn, osIdStr);
+                "Publicando evento {TipoEvento} no SNS ({TopicArn}) para OS {OsId} [CorrelationId={CorrelationId}]",
+                tipoEvento, _topicArn, osIdStr, correlationIdStr);
 
             await _sns.PublishAsync(request, cancellationToken);
         }
