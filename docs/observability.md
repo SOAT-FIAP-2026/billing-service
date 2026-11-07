@@ -65,3 +65,7 @@ docker compose up -d
 | Alertmanager | http://localhost:9093 |
 | Loki | http://localhost:3100 |
 | Tempo | http://localhost:3200 |
+
+O Blackbox Exporter é publicado em `http://localhost:9116` por padrão. Para usar
+outra porta no host, defina `BLACKBOX_EXPORTER_PORT`; a porta interna do serviço
+continua sendo `9115`.

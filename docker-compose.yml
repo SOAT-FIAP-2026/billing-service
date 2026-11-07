@@ -34,6 +34,9 @@ services:
       MercadoPago__AccessToken: ${MERCADO_PAGO_ACCESS_TOKEN:-}
       MercadoPago__WebhookSecret: ${MERCADO_PAGO_WEBHOOK_SECRET:-}
       MercadoPago__NotificationUrl: ${MERCADO_PAGO_NOTIFICATION_URL:-}
+      AWS_REGION: ${AWS_REGION:-sa-east-2}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-test}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-test}
       OTEL_SERVICE_NAME: billing-service
       OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
@@ -67,7 +70,7 @@ services:
     container_name: billing_service_blackbox
     restart: unless-stopped
     ports:
-      - "9115:9115"
+      - "${BLACKBOX_EXPORTER_PORT:-9116}:9115"
     volumes:
       - ./observability/blackbox/blackbox.yml:/config/blackbox.yml:ro
     command:

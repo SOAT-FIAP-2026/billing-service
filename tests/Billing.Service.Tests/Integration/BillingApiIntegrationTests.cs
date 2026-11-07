@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
+using System.Text.Json;
 
 namespace Billing.Service.Tests.Integration;
 
@@ -61,6 +62,24 @@ public sealed class BillingApiIntegrationTests : IAsyncLifetime
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         (await response.Content.ReadAsStringAsync()).Should().Contain("\"status\":\"healthy\"");
+    }
+
+    [Fact]
+    public async Task Swagger_nao_deve_declarar_corpo_no_get_de_listagem_de_orcamentos()
+    {
+        using var response = await _client.GetAsync("/swagger/v1/swagger.json");
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        using var document = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        var operation = document.RootElement
+            .GetProperty("paths")
+            .GetProperty("/api/v1/orcamento/listar")
+            .GetProperty("get");
+
+        operation.TryGetProperty("requestBody", out _).Should().BeFalse();
+        operation.GetProperty("parameters").EnumerateArray()
+            .Select(parameter => parameter.GetProperty("name").GetString())
+            .Should().Contain(new[] { "Page", "PageSize" });
     }
 
     public async Task DisposeAsync()

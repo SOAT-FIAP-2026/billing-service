@@ -35,7 +35,7 @@ namespace Billing.Service.Api.Controllers.V1
         }
 
         [HttpGet("listar")]
-        public async Task<IActionResult> BuscarTodosOrcamentos(PagedRequest pagedRequest)
+        public async Task<IActionResult> BuscarTodosOrcamentos([FromQuery] PagedRequest pagedRequest)
         {
             var orcamentos = await _orcamentoService.BuscarTodosOrcamentos(pagedRequest.Page, pagedRequest.PageSize);
 

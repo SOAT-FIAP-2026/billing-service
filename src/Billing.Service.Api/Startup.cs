@@ -29,7 +29,7 @@ namespace Billing.Service.Api
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "TechChallenge API v1");
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Billing Service API v1");
             });
 
             app.UseRouting();
