@@ -27,6 +27,8 @@ namespace Billing.Service.Api.Controllers.V1
         }
 
         [HttpGet("{id:guid}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> BuscarOrcamento(Guid id)
         {
             var orcamento = await _orcamentoService.BuscarOrcamento(id);
@@ -35,6 +37,8 @@ namespace Billing.Service.Api.Controllers.V1
         }
 
         [HttpGet("listar")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> BuscarTodosOrcamentos([FromQuery] PagedRequest pagedRequest)
         {
             var orcamentos = await _orcamentoService.BuscarTodosOrcamentos(pagedRequest.Page, pagedRequest.PageSize);
@@ -43,6 +47,8 @@ namespace Billing.Service.Api.Controllers.V1
         }
 
         [HttpPost("{id:guid}/enviar-orcamento")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> EnviarOrcamento(Guid id, [FromBody] EnviarOrcamentoRequest request)
         {
             string resultado = await _orcamentoService.EnviarOrcamento(id, request.EmailCliente);

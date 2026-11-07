@@ -62,6 +62,7 @@ namespace Billing.Service.Api.Middlewares
         {
             return exception switch
             {
+                DomainException when IsNotFoundException(exception) => StatusCodes.Status404NotFound,
                 DomainException => StatusCodes.Status400BadRequest,
                 ArgumentException => StatusCodes.Status400BadRequest,
                 InvalidOperationException => StatusCodes.Status400BadRequest,
@@ -81,6 +82,9 @@ namespace Billing.Service.Api.Middlewares
                 _ => "An unexpected internal error occurred."
             };
         }
+
+        private static bool IsNotFoundException(Exception exception) =>
+            exception.GetType().Name.EndsWith("NaoEncontradoException", StringComparison.Ordinal);
 
         private sealed record ErrorResponse(
             int StatusCode,

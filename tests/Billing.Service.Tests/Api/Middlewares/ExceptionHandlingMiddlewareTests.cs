@@ -22,7 +22,7 @@ namespace Billing.Service.Tests.Api.Middlewares
         }
 
         [Fact]
-        public async Task InvokeAsync_QuandoDomainExceptionLancada_DeveRetornarBadRequest()
+        public async Task InvokeAsync_QuandoRecursoNaoEncontrado_DeveRetornarNotFound()
         {
             // Arrange
             var id = Guid.NewGuid();
@@ -33,7 +33,7 @@ namespace Billing.Service.Tests.Api.Middlewares
             await middleware.InvokeAsync(_context);
 
             // Assert
-            _context.Response.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
+            _context.Response.StatusCode.Should().Be(StatusCodes.Status404NotFound);
 
             var responseBody = await GetResponseBody(_context);
             var data = JsonSerializer.Deserialize<Dictionary<string, object>>(responseBody, new JsonSerializerOptions

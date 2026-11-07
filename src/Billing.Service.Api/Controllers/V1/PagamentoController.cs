@@ -24,6 +24,8 @@ public class PagamentoController(
     }
 
     [HttpGet("{id:guid}")]
+    [ProducesResponseType(typeof(BoletoResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<BoletoResponse>> VerificarPagamento(Guid id)
     {
         var response = await pagamentoService.BuscarAsync(id);
@@ -32,6 +34,8 @@ public class PagamentoController(
 
     [HttpPost("webhook")]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Webhook(
         [FromBody] JsonElement notification,
         CancellationToken cancellationToken)
