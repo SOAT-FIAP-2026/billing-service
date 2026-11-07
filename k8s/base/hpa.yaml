@@ -1,0 +1,48 @@
+# ==============================================================================
+# HPA — Horizontal Pod Autoscaler (base compartilhada)
+# ==============================================================================
+# Pré-requisito: Metrics Server instalado no cluster.
+# Ver: k8s/metrics-server/install.sh
+# ==============================================================================
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: billing-service-hpa
+  namespace: techchallenge
+  labels:
+    app.kubernetes.io/name: billing-service
+    app.kubernetes.io/component: autoscaler
+    app.kubernetes.io/part-of: techchallenge
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: billing-service
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 50 # threshold menor para disparar em testes
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 95
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 15 # responde rápido em testes
+      policies:
+        - type: Pods
+          value: 2
+          periodSeconds: 30
+    scaleDown:
+      stabilizationWindowSeconds: 30 # aguarda 30 segundos antes de escalar para baixo
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 30

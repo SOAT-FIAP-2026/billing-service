@@ -18,7 +18,7 @@ public class ObservabilityConfigTests
     {
         var values = new Dictionary<string, string?>
         {
-            ["OTEL_SERVICE_NAME"] = "techchallenge-api-test"
+            ["OTEL_SERVICE_NAME"] = "billing-service-test"
         };
         if (otlpEndpoint is not null)
             values["OTEL_EXPORTER_OTLP_ENDPOINT"] = otlpEndpoint;

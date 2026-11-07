@@ -1,0 +1,23 @@
+# ==============================================================================
+# Service — LOCAL (Minikube / Kind)
+# NodePort: acessível via http://localhost:<nodePort> ou minikube service
+# ==============================================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: billing-service
+  namespace: techchallenge
+  labels:
+    app.kubernetes.io/name: billing-service
+    app.kubernetes.io/component: backend
+    app.kubernetes.io/part-of: techchallenge
+spec:
+  type: NodePort
+  selector:
+    app.kubernetes.io/name: billing-service
+  ports:
+    - port: 80
+      targetPort: 8080
+      nodePort: 30080
+      protocol: TCP
+      name: http

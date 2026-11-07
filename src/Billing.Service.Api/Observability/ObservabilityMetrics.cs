@@ -19,32 +19,32 @@ namespace Billing.Service.Api.Observability
             var meter = new Meter(MeterName, "1.0.0");
 
             _ordersCreated = meter.CreateCounter<long>(
-                "techchallenge.orders.created",
+                "billing.budgets.created",
                 unit: "{order}",
                 description: "Ordens de serviço criadas.");
 
             _orderStatusDuration = meter.CreateHistogram<double>(
-                "techchallenge.orders.status.duration",
+                "billing.budgets.status.duration",
                 unit: "ms",
                 description: "Tempo gasto em cada etapa do fluxo da ordem de serviço.");
 
             _orderProcessingFailures = meter.CreateCounter<long>(
-                "techchallenge.orders.processing.failures",
+                "billing.processing.failures",
                 unit: "{failure}",
                 description: "Falhas de processamento das ordens de serviço.");
 
             _integrationRequests = meter.CreateCounter<long>(
-                "techchallenge.integrations.requests",
+                "billing.integrations.requests",
                 unit: "{request}",
                 description: "Chamadas realizadas para integrações externas.");
 
             _integrationErrors = meter.CreateCounter<long>(
-                "techchallenge.integrations.errors",
+                "billing.integrations.errors",
                 unit: "{error}",
                 description: "Falhas em integrações externas.");
 
             _httpRequestDuration = meter.CreateHistogram<double>(
-                "techchallenge.http.request.duration",
+                "billing.http.request.duration",
                 unit: "ms",
                 description: "Latência das requisições HTTP da API.");
         }

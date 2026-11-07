@@ -1,0 +1,76 @@
+{
+  "info": {
+    "name": "Billing Service API",
+    "description": "Requests for budgets, boleto payments, Mercado Pago webhook and operational endpoints.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "orcamentoId", "value": "00000000-0000-0000-0000-000000000000" },
+    { "key": "pagamentoId", "value": "00000000-0000-0000-0000-000000000000" }
+  ],
+  "item": [
+    {
+      "name": "Operacional",
+      "item": [
+        { "name": "Ping", "request": { "method": "GET", "url": "{{baseUrl}}/api/ping" } },
+        { "name": "Liveness", "request": { "method": "GET", "url": "{{baseUrl}}/health/live" } },
+        { "name": "Readiness", "request": { "method": "GET", "url": "{{baseUrl}}/health/ready" } },
+        { "name": "Metrics", "request": { "method": "GET", "url": "{{baseUrl}}/metrics" } }
+      ]
+    },
+    {
+      "name": "Orçamentos",
+      "item": [
+        {
+          "name": "Gerar orçamento",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"servicos\":[{\"descricao\":\"Alinhamento\",\"valorUnitario\":120,\"quantidade\":1}],\"pecasInsumo\":[]}" },
+            "url": "{{baseUrl}}/api/v1/orcamento"
+          }
+        },
+        { "name": "Consultar orçamento", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/orcamento/{{orcamentoId}}" } },
+        { "name": "Listar orçamentos", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/orcamento/listar?page=1&pageSize=10" } },
+        {
+          "name": "Enviar orçamento",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"emailCliente\":\"cliente@example.com\"}" },
+            "url": "{{baseUrl}}/api/v1/orcamento/{{orcamentoId}}/enviar-orcamento"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Pagamentos",
+      "item": [
+        {
+          "name": "Criar boleto",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"idOrcamento\":\"{{orcamentoId}}\",\"email\":\"cliente@example.com\",\"nome\":\"Cliente\",\"sobrenome\":\"Teste\",\"cpf\":\"12345678909\"}" },
+            "url": "{{baseUrl}}/api/v1/pagamento/boleto"
+          }
+        },
+        { "name": "Consultar pagamento", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/pagamento/{{pagamentoId}}" } },
+        {
+          "name": "Webhook Mercado Pago",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-request-id", "value": "postman-request-id" },
+              { "key": "x-signature", "value": "ts=timestamp,v1=signature" }
+            ],
+            "body": { "mode": "raw", "raw": "{\"data\":{\"id\":\"mercado-pago-payment-id\"},\"status\":\"approved\"}" },
+            "url": "{{baseUrl}}/api/v1/pagamento/webhook"
+          }
+        }
+      ]
+    }
+  ]
+}

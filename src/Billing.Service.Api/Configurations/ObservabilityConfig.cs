@@ -19,7 +19,7 @@ namespace Billing.Service.Api.Configurations
 
             string serviceName = configuration["OTEL_SERVICE_NAME"]
                 ?? configuration["Observability:ServiceName"]
-                ?? "techchallenge-api";
+                ?? "billing-service";
             string? otlpEndpoint = configuration["OTEL_EXPORTER_OTLP_ENDPOINT"];
 
             services.AddOpenTelemetry()

@@ -32,11 +32,11 @@ public class ObservabilityMetricsTests
         metrics.RecordHttpRequest(TimeSpan.FromMilliseconds(-1), "GET", StatusCodes.Status200OK);
 
         instrumentNames.Should().BeEquivalentTo(
-            "techchallenge.orders.created",
-            "techchallenge.orders.status.duration",
-            "techchallenge.orders.processing.failures",
-            "techchallenge.integrations.requests",
-            "techchallenge.integrations.errors",
-            "techchallenge.http.request.duration");
+            "billing.budgets.created",
+            "billing.budgets.status.duration",
+            "billing.processing.failures",
+            "billing.integrations.requests",
+            "billing.integrations.errors",
+            "billing.http.request.duration");
     }
 }

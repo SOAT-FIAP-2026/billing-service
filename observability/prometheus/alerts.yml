@@ -1,0 +1,70 @@
+groups:
+  - name: techchallenge-business
+    rules:
+      - alert: BillingProcessingFailure
+        expr: sum(increase(billing_processing_failures_total[5m])) > 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: Falha no processamento do Billing Service
+          description: O Billing Service registrou falha de processamento nos últimos 5 minutos.
+
+      - alert: BillingIntegrationError
+        expr: sum(increase(billing_integrations_errors_total[5m])) > 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: Erro em integração externa do Billing Service
+          description: Uma integração externa do Billing Service registrou erro nos últimos 5 minutos.
+
+      - alert: BillingApiHighLatency
+        expr: histogram_quantile(0.95, sum(rate(billing_http_request_duration_milliseconds_bucket[5m])) by (le)) > 1000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Latência p95 da API acima de 1 segundo
+          description: A latência p95 das requisições HTTP está acima do limite por 5 minutos.
+
+      - alert: BillingHealthcheckDown
+        expr: probe_success{job="billing-service-health"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: Healthcheck da API indisponível
+          description: O endpoint /health/ready não respondeu com sucesso por 2 minutos.
+
+      - alert: BillingApiHighErrorRate
+        expr: |
+          sum(rate(billing_http_request_duration_milliseconds_count{status_code=~"5.."}[5m]))
+            /
+          clamp_min(          sum(rate(billing_http_request_duration_milliseconds_count[5m])), 0.001) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Taxa de erro 5xx acima de 5%
+          description: Mais de 5% das requisições HTTP retornaram erro de servidor nos últimos 5 minutos.
+
+  - name: techchallenge-runtime
+    rules:
+      - alert: BillingHealthcheckSlow
+        expr: probe_duration_seconds{job="billing-service-health"} > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Healthcheck lento
+          description: O /health/ready está demorando mais de 2 segundos para responder.
+
+      - alert: BillingServiceDown
+        expr: up{job="billing-service"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: Prometheus não consegue coletar a API
+          description: O alvo billing-service está fora do ar há 2 minutos.

@@ -1,0 +1,21 @@
+# ==============================================================================
+# ConfigMap — Variáveis de configuração NÃO sensíveis (base compartilhada)
+# Valores específicos de ambiente são sobrescritos nos overlays.
+# ==============================================================================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: billing-service-config
+  namespace: techchallenge
+  labels:
+    app.kubernetes.io/name: billing-service
+    app.kubernetes.io/component: config
+    app.kubernetes.io/part-of: techchallenge
+data:
+  ASPNETCORE_URLS: "http://+:8080"
+  OTEL_SERVICE_NAME: "billing-service"
+  OTEL_EXPORTER_OTLP_PROTOCOL: "http/protobuf"
+  OTEL_EXPORTER_OTLP_ENDPOINT: ""
+  OTEL_RESOURCE_ATTRIBUTES: "service.namespace=techchallenge,deployment.environment=unknown"
+  # ASPNETCORE_ENVIRONMENT é definido por cada overlay (Production / Development)
+  # ConnectionStrings__DefaultConnection é definido no Secret de cada overlay

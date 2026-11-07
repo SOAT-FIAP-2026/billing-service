@@ -1,0 +1,132 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: techchallenge-alerts
+  namespace: techchallenge
+  labels:
+    app.kubernetes.io/part-of: techchallenge
+spec:
+  groups:
+    - name: techchallenge.business
+      rules:
+        - alert: BillingProcessingFailure
+          expr: sum(increase(billing_processing_failures_total[5m])) > 0
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: Falha no processamento do Billing Service
+            description: O Billing Service registrou falha de processamento nos últimos 5 minutos.
+
+        - alert: TechChallengeIntegrationError
+          expr: sum(increase(techchallenge_integrations_errors_total[5m])) > 0
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: Erro em integração externa
+            description: Uma integração externa registrou erro nos últimos 5 minutos.
+
+        - alert: TechChallengeApiHighLatency
+          expr: histogram_quantile(0.95, sum(rate(techchallenge_http_request_duration_milliseconds_bucket[5m])) by (le)) > 1000
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: Latência p95 da API acima de 1 segundo
+            description: A latência p95 das requisições HTTP está acima do limite por 5 minutos.
+
+        - alert: TechChallengeApiUnavailable
+          expr: kube_deployment_status_replicas_available{namespace="techchallenge",deployment="api"} < 1
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: API indisponível
+            description: O deployment da API não possui réplicas disponíveis.
+
+        - alert: TechChallengeHealthcheckDown
+          expr: probe_success{job="techchallenge-health"} == 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: Healthcheck da API indisponível
+            description: O endpoint /health/ready não respondeu com sucesso por 2 minutos.
+
+        - alert: TechChallengeApiHighErrorRate
+          expr: |
+            sum(rate(techchallenge_http_request_duration_milliseconds_count{status_code=~"5.."}[5m]))
+              /
+            clamp_min(sum(rate(techchallenge_http_request_duration_milliseconds_count[5m])), 0.001) > 0.05
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: Taxa de erro 5xx acima de 5%
+            description: Mais de 5% das requisições HTTP retornaram erro de servidor nos últimos 5 minutos.
+
+    - name: techchallenge.kubernetes
+      rules:
+        - alert: TechChallengePodCpuHigh
+          expr: |
+            sum by (pod) (rate(container_cpu_usage_seconds_total{namespace="techchallenge",container!="",container!="POD"}[5m]))
+              /
+            sum by (pod) (kube_pod_container_resource_limits{namespace="techchallenge",resource="cpu"}) > 0.85
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: Consumo de CPU acima de 85% do limite
+            description: O pod {{ $labels.pod }} está acima de 85% do limite de CPU há 10 minutos.
+
+        - alert: TechChallengePodMemoryHigh
+          expr: |
+            sum by (pod) (container_memory_working_set_bytes{namespace="techchallenge",container!="",container!="POD"})
+              /
+            sum by (pod) (kube_pod_container_resource_limits{namespace="techchallenge",resource="memory"}) > 0.85
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: Consumo de memória acima de 85% do limite
+            description: O pod {{ $labels.pod }} está acima de 85% do limite de memória há 10 minutos; risco de OOMKill.
+
+        - alert: TechChallengePodCrashLooping
+          expr: kube_pod_container_status_waiting_reason{namespace="techchallenge",reason="CrashLoopBackOff"} == 1
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: Pod em CrashLoopBackOff
+            description: O container {{ $labels.container }} do pod {{ $labels.pod }} está reiniciando em loop.
+
+        - alert: TechChallengePodOOMKilled
+          expr: kube_pod_container_status_last_terminated_reason{namespace="techchallenge",reason="OOMKilled"} == 1
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: Container encerrado por falta de memória
+            description: O container {{ $labels.container }} do pod {{ $labels.pod }} sofreu OOMKill; revise requests/limits.
+
+        - alert: TechChallengePodRestarting
+          expr: increase(kube_pod_container_status_restarts_total{namespace="techchallenge"}[15m]) > 2
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: Reinícios frequentes de container
+            description: O container {{ $labels.container }} do pod {{ $labels.pod }} reiniciou mais de 2 vezes em 15 minutos.
+
+        - alert: TechChallengeHpaAtMaxReplicas
+          expr: |
+            kube_horizontalpodautoscaler_status_current_replicas{namespace="techchallenge",horizontalpodautoscaler="api-hpa"}
+              >=
+            kube_horizontalpodautoscaler_spec_max_replicas{namespace="techchallenge",horizontalpodautoscaler="api-hpa"}
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: HPA no número máximo de réplicas
+            description: O HPA api-hpa está no teto de réplicas há 15 minutos; a capacidade do cluster pode estar saturada.

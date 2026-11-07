@@ -14,7 +14,7 @@ if (string.IsNullOrWhiteSpace(connectionString) ||
 {
     builder.Configuration["ConnectionStrings:DefaultConnection"] =
         Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
-        ?? "Host=localhost;Port=5432;Database=techchallengedb;Username=postgres;Password=postgres";
+        ?? "Host=localhost;Port=5432;Database=billingdb;Username=postgres;Password=postgres";
 }
 
 builder.Logging.ClearProviders();

@@ -1,0 +1,21 @@
+# ==============================================================================
+# Service — AWS / EKS
+# ==============================================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: billing-service
+  namespace: techchallenge
+  labels:
+    app.kubernetes.io/name: billing-service
+    app.kubernetes.io/component: backend
+    app.kubernetes.io/part-of: techchallenge
+spec:
+  type: LoadBalancer
+  selector:
+    app.kubernetes.io/name: billing-service
+  ports:
+    - port: 80
+      targetPort: 8080
+      protocol: TCP
+      name: http
