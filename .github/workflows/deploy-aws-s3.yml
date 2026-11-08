@@ -4,13 +4,7 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'src/Billing.Service.Api/**'
-      - 'src/Billing.Service.Domain/**'
-      - 'src/Billing.Service.Application/**'
-      - 'src/Billing.Service.Infrastructure/**'
-      - 'src/Billing.Service.External/**'
-  workflow_dispatch: 
+  workflow_dispatch:
 
 jobs:
   deploy:
