@@ -6,7 +6,7 @@
         <Configuration>
           <Format>opencover,cobertura</Format>
           <Exclude>[*Tests*]*,[Fiap.TechChallenge.Contracts]*</Exclude>
-          <ExcludeByFile>**/Migrations/*.cs,**/tests/**/*.cs,**\tests\**\*.cs</ExcludeByFile>
+          <ExcludeByFile>**/Migrations/*.cs,**/tests/**/*.cs,**\tests\**\*.cs,**/.github/**/*.cs,**/k8s/**/*.cs,**/docs/**/*.cs</ExcludeByFile>
         </Configuration>
       </DataCollector>
     </DataCollectors>

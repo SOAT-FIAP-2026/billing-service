@@ -71,7 +71,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         shell: powershell
         run: |
-          ${{ runner.temp }}\scanner\dotnet-sonarscanner begin /k:"SOAT-FIAP-2026_billing-service" /o:"soat-fiap-2026" /d:sonar.token="$env:SONAR_TOKEN" /d:sonar.cs.opencover.reportsPaths="TestResults/**/coverage.opencover.xml" /d:sonar.coverage.exclusions="**/Migrations/**"
+          ${{ runner.temp }}\scanner\dotnet-sonarscanner begin /k:"SOAT-FIAP-2026_billing-service" /o:"soat-fiap-2026" /d:sonar.token="$env:SONAR_TOKEN" /d:sonar.cs.opencover.reportsPaths="TestResults/**/coverage.opencover.xml" /d:sonar.inclusions="src/**/*.cs" /d:sonar.coverage.exclusions="**/Migrations/**"
 
       - name: Build and test
         shell: powershell
