@@ -40,9 +40,7 @@ namespace Billing.Service.Infrastructure.Messaging
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
             _queueUrl = _configuration["BILLING_QUEUE_URL"]
-                ?? _configuration["Aws:BillingQueueUrl"]
-                // NOSONAR — somente fallback do ambiente local; produção exige URL configurada.
-                ?? "http://floci:4566/000000000000/techchallenge-billing-eventos-local";
+                ?? _configuration["Aws:BillingQueueUrl"];
             _billingPublicBaseUrl = new Uri(
                 _configuration["BILLING_PUBLIC_BASE_URL"] ?? "https://billing-service",
                 UriKind.Absolute).GetLeftPart(UriPartial.Authority);
