@@ -106,6 +106,33 @@ public class PagamentoServiceTests
     }
 
     [Fact]
+    public async Task CriarBoletoAsync_DeveNormalizarVencimentoParaUtc()
+    {
+        var orcamento = new Orcamento(Guid.NewGuid(), Guid.NewGuid(), 150m);
+        var pagamentoRepository = new Mock<IPagamentoRepository>();
+        Pagamento? persistido = null;
+        pagamentoRepository
+            .Setup(x => x.AdicionarAsync(It.IsAny<Pagamento>()))
+            .Callback<Pagamento>(pagamento => persistido = pagamento);
+
+        var vencimento = new DateTimeOffset(2026, 11, 8, 14, 0, 0, TimeSpan.FromHours(-4));
+        var mercadoPago = new Mock<IMercadoPagoClient>();
+        mercadoPago
+            .Setup(x => x.CriarBoletoAsync(It.IsAny<MercadoPagoBoletoRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new MercadoPagoBoletoResponse("mp-utc", "pending", "pending", null, null, vencimento));
+
+        var orcamentoService = new Mock<global::Billing.Service.Application.Interfaces.IOrcamentoService>();
+        orcamentoService.Setup(x => x.BuscarOrcamento(orcamento.Id)).ReturnsAsync(orcamento);
+
+        var service = CriarService(orcamentoService, pagamentoRepository, mercadoPago);
+        await service.CriarBoletoAsync(CriarRequest(orcamento.Id), CancellationToken.None);
+
+        Assert.NotNull(persistido);
+        Assert.Equal(TimeSpan.Zero, persistido!.DataVencimento!.Value.Offset);
+        Assert.Equal(vencimento.UtcDateTime, persistido.DataVencimento.Value.UtcDateTime);
+    }
+
+    [Fact]
     public async Task CriarBoletoAsync_QuandoOrcamentoNaoExiste_DevePropagarExcecao()
     {
         var exception = new InvalidOperationException("Orçamento não encontrado.");

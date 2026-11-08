@@ -49,7 +49,7 @@ public class Pagamento : EntidadeAuditavel
         IdMercadoPago = idMercadoPago;
         BoletoUrl = boletoUrl;
         CodigoBarras = codigoBarras;
-        DataVencimento = dataVencimento;
+        DataVencimento = dataVencimento?.ToUniversalTime();
         AtualizarStatus(status, detalheStatus);
     }
 
