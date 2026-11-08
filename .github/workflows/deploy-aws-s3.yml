@@ -56,6 +56,8 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           aws-region: ${{ secrets.AWS_REGION }}
+          audience: sts.amazonaws.com
+          role-session-name: github-actions-billing-lambda
 
       - name: Upload Artifact to S3
         run: |
