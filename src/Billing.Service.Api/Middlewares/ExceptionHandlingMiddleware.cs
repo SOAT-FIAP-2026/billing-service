@@ -54,7 +54,7 @@ namespace Billing.Service.Api.Middlewares
                 );
 
                 var json = JsonSerializer.Serialize(payload, JsonOptions);
-                await context.Response.WriteAsync(json);
+                await context.Response.WriteAsync(json, context.RequestAborted);
             }
         }
 
