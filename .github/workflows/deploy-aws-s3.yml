@@ -70,6 +70,8 @@ jobs:
         env:
           MERCADO_PAGO_ACCESS_TOKEN: ${{ secrets.MERCADO_PAGO_ACCESS_TOKEN }}
           MERCADO_PAGO_WEBHOOK_SECRET: ${{ secrets.MERCADO_PAGO_WEBHOOK_SECRET }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          RESEND_FROM_EMAIL: ${{ secrets.RESEND_FROM_EMAIL }}
           MERCADO_PAGO_NOTIFICATION_URL: https://figg7rtf4l7sqb2t2fsodkq45m0vmtkt.lambda-url.us-east-2.on.aws/api/v1/pagamento/webhook
         run: |
           set -euo pipefail
@@ -82,6 +84,10 @@ jobs:
             echo "::error::Secret MERCADO_PAGO_WEBHOOK_SECRET não configurado."
             exit 1
           }
+          test -n "$RESEND_API_KEY" || {
+            echo "::error::Secret RESEND_API_KEY não configurado."
+            exit 1
+          }
 
           aws lambda get-function-configuration \
             --function-name fiap-billing-service-api \
@@ -91,10 +97,14 @@ jobs:
           jq \
             --arg accessToken "$MERCADO_PAGO_ACCESS_TOKEN" \
             --arg webhookSecret "$MERCADO_PAGO_WEBHOOK_SECRET" \
+            --arg resendApiKey "$RESEND_API_KEY" \
+            --arg resendFromEmail "${RESEND_FROM_EMAIL:-onboarding@resend.dev}" \
             --arg notificationUrl "$MERCADO_PAGO_NOTIFICATION_URL" \
             '. + {
               "MercadoPago__AccessToken": $accessToken,
               "MercadoPago__WebhookSecret": $webhookSecret,
+              "RESEND_API_KEY": $resendApiKey,
+              "RESEND_FROM_EMAIL": $resendFromEmail,
               "MercadoPago__NotificationUrl": $notificationUrl
             } | { "Variables": . }' lambda-environment.json > lambda-environment.updated.json
 

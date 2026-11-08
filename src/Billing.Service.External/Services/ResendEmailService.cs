@@ -12,6 +12,8 @@ namespace Billing.Service.External.Services
         private readonly HttpClient _httpClient;
         private readonly IObservabilityMetrics? _observabilityMetrics;
         private readonly ILogger<ResendEmailService>? _logger;
+        private readonly string _from;
+        private readonly bool _apiKeyConfigured;
 
         public ResendEmailService(
             HttpClient httpClient,
@@ -23,18 +25,24 @@ namespace Billing.Service.External.Services
             _observabilityMetrics = observabilityMetrics;
             _logger = logger;
             var apiKey = configuration["RESEND_API_KEY"];
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+            _from = configuration["RESEND_FROM_EMAIL"] ?? "onboarding@resend.dev";
+            _apiKeyConfigured = !string.IsNullOrWhiteSpace(apiKey);
+            if (_apiKeyConfigured)
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
         }
 
         public async Task<bool> EnviarEmailAsync(string para, string assunto, string corpoHtml)
         {
-            // MOCK: O Resend só permite enviar para o e-mail cadastrado no plano gratuito
-            string emailDestino = "dio_kenedy@hotmail.com";
+            if (!_apiKeyConfigured)
+            {
+                RecordFailure(new InvalidOperationException("RESEND_API_KEY não configurada."));
+                return false;
+            }
 
             var payload = new
             {
-                from = "osstatusupdate@resend.dev",
-                to = emailDestino,
+                from = _from,
+                to = para,
                 subject = assunto,
                 html = corpoHtml
             };

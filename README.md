@@ -10,6 +10,8 @@ MercadoPago__AccessToken=<Access Token de teste ou produção>
 MercadoPago__NotificationUrl=https://seu-dominio/api/v1/pagamento/webhook
 MercadoPago__WebhookSecret=<segredo da assinatura do webhook>
 ConnectionStrings__DefaultConnection=<connection string do PostgreSQL>
+RESEND_API_KEY=<API key do Resend>
+RESEND_FROM_EMAIL=<remetente verificado no Resend>
 ```
 
 No GitHub Actions, cadastre `MERCADO_PAGO_ACCESS_TOKEN` e
@@ -27,6 +29,11 @@ publicamente acessível e apontar para o endpoint de webhook. No painel do
 Mercado Pago, configure essa URL para os ambientes de teste e produção,
 habilite o evento **Pagamentos** e copie a chave secreta gerada para
 `MercadoPago__WebhookSecret`. Nunca versione o access token ou a chave secreta.
+
+Para o endpoint `POST /api/v1/orcamento/{id}/enviar-orcamento`, configure
+`RESEND_API_KEY` e um `RESEND_FROM_EMAIL` verificado. O endereço enviado no corpo
+da requisição é usado como destinatário; no plano gratuito do Resend, o destino
+pode precisar ser o e-mail autorizado da conta.
 
 Endpoints:
 

@@ -90,6 +90,35 @@ namespace Billing.Service.Tests.External.Services
         }
 
         [Fact]
+        public async Task EnviarEmailAsync_DeveUsarDestinatarioInformado()
+        {
+            HttpRequestMessage? request = null;
+            var handlerMock = new Mock<HttpMessageHandler>(MockBehavior.Strict);
+            handlerMock.Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .Callback<HttpRequestMessage, CancellationToken>((message, _) => request = message)
+                .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK));
+
+            var configuration = new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    ["RESEND_API_KEY"] = "re_test_fake_key",
+                    ["RESEND_FROM_EMAIL"] = "billing@example.com"
+                })
+                .Build();
+            var service = new ResendEmailService(new HttpClient(handlerMock.Object), configuration);
+
+            await service.EnviarEmailAsync("cliente@teste.com", "Assunto", "<p>Teste</p>");
+
+            var body = await request!.Content!.ReadAsStringAsync();
+            Assert.Contains("\"to\":\"cliente@teste.com\"", body);
+            Assert.Contains("\"from\":\"billing@example.com\"", body);
+        }
+
+        [Fact]
         public async Task EnviarEmailAsync_QuandoResendFalhar_DeveRegistrarMetricasDeFalha()
         {
             var handlerMock = new Mock<HttpMessageHandler>(MockBehavior.Strict);

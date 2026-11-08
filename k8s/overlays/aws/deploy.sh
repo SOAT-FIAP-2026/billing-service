@@ -71,6 +71,8 @@ echo "🔍 Obtendo credenciais atualizadas do AWS SSM Parameter Store..."
   export MERCADO_PAGO_ACCESS_TOKEN_BASE64=$(echo -n "${MERCADO_PAGO_ACCESS_TOKEN:-}" | base64 -w0)
   export MERCADO_PAGO_WEBHOOK_SECRET_BASE64=$(echo -n "${MERCADO_PAGO_WEBHOOK_SECRET:-}" | base64 -w0)
   export MERCADO_PAGO_NOTIFICATION_URL_BASE64=$(echo -n "${MERCADO_PAGO_NOTIFICATION_URL:-}" | base64 -w0)
+  export RESEND_API_KEY_BASE64=$(echo -n "${RESEND_API_KEY:-}" | base64 -w0)
+  export RESEND_FROM_EMAIL_BASE64=$(echo -n "${RESEND_FROM_EMAIL:-onboarding@resend.dev}" | base64 -w0)
 
   if [ -f ~/.docker/config.json ]; then
     export DOCKER_CONFIG_JSON_BASE64=$(cat ~/.docker/config.json | base64 -w0)

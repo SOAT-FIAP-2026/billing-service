@@ -1,82 +1,74 @@
-name: SonarCloud
+name: SonarQube
 
 on:
   push:
     branches:
       - main
   pull_request:
-    branches:
-      - main
+    types: [opened, synchronize, reopened]
 
 permissions:
   contents: read
   pull-requests: read
 
 jobs:
-  build-and-analyze:
-    runs-on: ubuntu-latest
+  build:
+    name: Build and analyze
+    runs-on: windows-latest
     steps:
-      - name: Checkout Billing Service
-        uses: actions/checkout@v4
+      - name: Set up JDK 21
+        uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4.8.0
+        with:
+          java-version: 21
+          distribution: 'zulu'
+
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
           fetch-depth: 0
 
       - name: Checkout shared contracts
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
           repository: SOAT-FIAP-2026/shared
           ref: main
           path: .shared
           token: ${{ secrets.GH_PAT || github.token }}
 
-      - name: Move shared to sibling directory
+      - name: Place shared contracts beside the repository
+        shell: powershell
         run: |
-          rm -rf ../shared
-          mv .shared ../shared
+          if (Test-Path ..\shared) {
+            Remove-Item ..\shared -Recurse -Force
+          }
+          Move-Item .shared ..\shared
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - name: Cache SonarQube Cloud packages
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
-          dotnet-version: 8.0.x
-          cache: true
-          cache-dependency-path: |
-            Billing.Service.sln
-            **/*.csproj
+          path: ~\sonar\cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
 
-      - name: Setup Java
-        uses: actions/setup-java@v4
+      - name: Cache SonarQube Cloud scanner
+        id: cache-sonar-scanner
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
-          distribution: temurin
-          java-version: 17
+          path: ${{ runner.temp }}\scanner
+          key: ${{ runner.os }}-sonar-scanner
+          restore-keys: ${{ runner.os }}-sonar-scanner
 
-      - name: Install SonarScanner
-        run: dotnet tool install --global dotnet-sonarscanner
+      - name: Install SonarQube Cloud scanner
+        if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
+        shell: powershell
+        run: |
+          New-Item -Path ${{ runner.temp }}\scanner -ItemType Directory -Force
+          dotnet tool update dotnet-sonarscanner --tool-path ${{ runner.temp }}\scanner
 
-      - name: Begin SonarCloud analysis
+      - name: Build and analyze
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: >
-          dotnet sonarscanner begin
-          /k:"SOAT-FIAP-2026_billing-service"
-          /o:"soat-fiap-2026"
-          /d:sonar.token="$SONAR_TOKEN"
-          /d:sonar.host.url="https://sonarcloud.io"
-          /d:sonar.cs.opencover.reportsPaths="TestResults/**/coverage.opencover.xml"
-          /d:sonar.coverage.exclusions="**/Migrations/**"
-
-      - name: Build
-        run: dotnet build Billing.Service.sln --configuration Release
-
-      - name: Test with coverage
-        run: >
-          dotnet test tests/Billing.Service.Tests/Billing.Service.Tests.csproj
-          --configuration Release
-          --no-build
-          --settings coverlet.runsettings
-          --collect:"XPlat Code Coverage"
-          --results-directory TestResults
-
-      - name: End SonarCloud analysis
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: dotnet sonarscanner end /d:sonar.token="$SONAR_TOKEN"
+        shell: powershell
+        run: |
+          ${{ runner.temp }}\scanner\dotnet-sonarscanner begin /k:"SOAT-FIAP-2026_billing-service" /o:"soat-fiap-2026" /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+          dotnet build
+          ${{ runner.temp }}\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"

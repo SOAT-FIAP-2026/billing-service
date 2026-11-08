@@ -121,6 +121,8 @@ jobs:
           MERCADO_PAGO_ACCESS_TOKEN: ${{ secrets.MERCADO_PAGO_ACCESS_TOKEN }}
           MERCADO_PAGO_WEBHOOK_SECRET: ${{ secrets.MERCADO_PAGO_WEBHOOK_SECRET }}
           MERCADO_PAGO_NOTIFICATION_URL: ${{ secrets.MERCADO_PAGO_NOTIFICATION_URL }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          RESEND_FROM_EMAIL: ${{ secrets.RESEND_FROM_EMAIL }}
         run: |
           test -n "$MERCADO_PAGO_ACCESS_TOKEN" || {
             echo "::error::MERCADO_PAGO_ACCESS_TOKEN is not configured."

@@ -48,6 +48,8 @@ export POSTGRES_PASSWORD="${POSTGRES_PASSWORD:-postgres}"
 export MERCADO_PAGO_ACCESS_TOKEN="${MERCADO_PAGO_ACCESS_TOKEN:-}"
 export MERCADO_PAGO_WEBHOOK_SECRET="${MERCADO_PAGO_WEBHOOK_SECRET:-}"
 export MERCADO_PAGO_NOTIFICATION_URL="${MERCADO_PAGO_NOTIFICATION_URL:-}"
+export RESEND_API_KEY="${RESEND_API_KEY:-}"
+export RESEND_FROM_EMAIL="${RESEND_FROM_EMAIL:-onboarding@resend.dev}"
 
 echo "🔐 Gerando Secret local a partir do template..."
 if command -v envsubst >/dev/null 2>&1; then
@@ -57,6 +59,8 @@ else
       -e "s|\${MERCADO_PAGO_ACCESS_TOKEN}|$MERCADO_PAGO_ACCESS_TOKEN|g" \
       -e "s|\${MERCADO_PAGO_WEBHOOK_SECRET}|$MERCADO_PAGO_WEBHOOK_SECRET|g" \
       -e "s|\${MERCADO_PAGO_NOTIFICATION_URL}|$MERCADO_PAGO_NOTIFICATION_URL|g" \
+      -e "s|\${RESEND_API_KEY}|$RESEND_API_KEY|g" \
+      -e "s|\${RESEND_FROM_EMAIL}|$RESEND_FROM_EMAIL|g" \
       "$OVERLAY_DIR/secrets.yaml.template" > "$OVERLAY_DIR/secrets.yaml"
 fi
 
