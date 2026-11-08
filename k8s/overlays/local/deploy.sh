@@ -37,7 +37,7 @@ kubectl apply -f "$BASE_DIR/namespace.yaml"
 # --- 3. ConfigMap e Secrets -----------------------------------------------
 # O secrets.yaml nao e versionado: ele e gerado a partir do template. Os valores
 # padrao servem apenas para o cluster local descartavel.
-export POSTGRES_PASSWORD="${POSTGRES_PASSWORD:-postgres}"
+export POSTGRES_PASSWORD="${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be configured before deployment}"
 export MERCADO_PAGO_ACCESS_TOKEN="${MERCADO_PAGO_ACCESS_TOKEN:-}"
 export MERCADO_PAGO_WEBHOOK_SECRET="${MERCADO_PAGO_WEBHOOK_SECRET:-}"
 export MERCADO_PAGO_NOTIFICATION_URL="${MERCADO_PAGO_NOTIFICATION_URL:-}"

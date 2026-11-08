@@ -27,7 +27,7 @@ kubectl apply -f (Join-Path $scriptDir "postgres.yaml")
 kubectl rollout status deployment/postgres -n techchallenge --timeout=120s
 # O secrets.yaml nao e versionado: e gerado do template. Os valores padrao
 # servem apenas para o cluster local descartavel.
-if (-not $env:POSTGRES_PASSWORD) { $env:POSTGRES_PASSWORD = "postgres" }
+if (-not $env:POSTGRES_PASSWORD) { throw "POSTGRES_PASSWORD must be configured before deployment." }
 if (-not $env:MERCADO_PAGO_ACCESS_TOKEN) { $env:MERCADO_PAGO_ACCESS_TOKEN = "" }
 if (-not $env:MERCADO_PAGO_WEBHOOK_SECRET) { $env:MERCADO_PAGO_WEBHOOK_SECRET = "" }
 if (-not $env:MERCADO_PAGO_NOTIFICATION_URL) { $env:MERCADO_PAGO_NOTIFICATION_URL = "" }

@@ -12,6 +12,7 @@ metadata:
     app.kubernetes.io/component: config
     app.kubernetes.io/part-of: techchallenge
 data:
+  # NOSONAR — tráfego interno do pod; TLS termina no Ingress.
   ASPNETCORE_URLS: "http://+:8080"
   OTEL_SERVICE_NAME: "billing-service"
   OTEL_EXPORTER_OTLP_PROTOCOL: "http/protobuf"

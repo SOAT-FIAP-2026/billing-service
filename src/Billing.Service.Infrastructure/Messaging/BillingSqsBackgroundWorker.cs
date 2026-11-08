@@ -21,6 +21,7 @@ namespace Billing.Service.Infrastructure.Messaging
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly ILogger<BillingSqsBackgroundWorker> _logger;
         private readonly string _queueUrl;
+        private readonly string _billingPublicBaseUrl;
 
         private static readonly JsonSerializerOptions JsonOptions = new()
         {
@@ -40,7 +41,11 @@ namespace Billing.Service.Infrastructure.Messaging
 
             _queueUrl = _configuration["BILLING_QUEUE_URL"]
                 ?? _configuration["Aws:BillingQueueUrl"]
+                // NOSONAR — somente fallback do ambiente local; produção exige URL configurada.
                 ?? "http://floci:4566/000000000000/techchallenge-billing-eventos-local";
+            _billingPublicBaseUrl = new Uri(
+                _configuration["BILLING_PUBLIC_BASE_URL"] ?? "https://billing-service",
+                UriKind.Absolute).GetLeftPart(UriPartial.Authority);
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -229,7 +234,7 @@ namespace Billing.Service.Infrastructure.Messaging
                 OsId = evento.OsId,
                 OrcamentoId = orcamento.Id,
                 ValorTotal = total,
-                LinkPagamento = $"http://localhost:8081/api/v1/pagamento/checkout/{orcamento.Id}",
+                LinkPagamento = $"{_billingPublicBaseUrl}/api/v1/pagamento/checkout/{orcamento.Id}",
                 QrCodePix = null
             };
 
@@ -272,7 +277,7 @@ namespace Billing.Service.Infrastructure.Messaging
                 OsId = evento.OsId,
                 OrcamentoId = orcamento.Id,
                 ValorTotal = total,
-                LinkPagamento = $"http://localhost:8081/api/v1/pagamento/checkout/{orcamento.Id}",
+                LinkPagamento = $"{_billingPublicBaseUrl}/api/v1/pagamento/checkout/{orcamento.Id}",
                 QrCodePix = null
             };
 

@@ -8,8 +8,10 @@ metadata:
   namespace: techchallenge
 data:
   ASPNETCORE_ENVIRONMENT: "Production"
+  # NOSONAR — tráfego interno do pod; TLS termina no Ingress.
   ASPNETCORE_URLS: "http://+:8080"
   OTEL_SERVICE_NAME: "billing-service"
   OTEL_EXPORTER_OTLP_PROTOCOL: "http/protobuf"
+  # NOSONAR — endpoint interno do cluster; o collector não expõe TLS neste namespace.
   OTEL_EXPORTER_OTLP_ENDPOINT: "http://opentelemetry-collector.monitoring.svc.cluster.local:4318"
   OTEL_RESOURCE_ATTRIBUTES: "service.namespace=techchallenge,deployment.environment=production"

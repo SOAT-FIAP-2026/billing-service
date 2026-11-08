@@ -57,13 +57,9 @@ echo "🔍 Obtendo credenciais atualizadas do AWS SSM Parameter Store..."
       --query "DBInstances[?contains(DBInstanceIdentifier, 'prod-db')].Endpoint.Address" \
       --output text 2>/dev/null | awk '{print $1}' || true)
     
-    if [ -n "$RDS_HOST" ] && [ "$RDS_HOST" != "None" ]; then
-      echo "   ✅ RDS PostgreSQL encontrado: $RDS_HOST"
-      DB_CONN="Host=${RDS_HOST};Port=5432;Database=billingdb;Username=postgres;Password=TechChallenge2026!#$%"
-    else
-      echo "   ⚠️ RDS não encontrado via AWS CLI. Usando placeholder temporário..."
-      DB_CONN="Host=placeholder.rds.amazonaws.com;Port=5432;Database=billingdb;Username=postgres;Password=placeholder"
-    fi
+    echo "   ❌ Não foi possível obter uma connection string segura do SSM Parameter Store."
+    echo "      Publique /techchallenge/prod/db_connection_string antes do deploy."
+    exit 1
   fi
 
   # Gera os valores em Base64 (usando -w0 para evitar quebra de linha).
