@@ -74,7 +74,7 @@ public sealed class MercadoPagoClient : IMercadoPagoClient
             "X-Idempotency-Key",
             request.IdempotencyKey ?? Guid.NewGuid().ToString());
         using var httpResponse = await _httpClient.SendAsync(httpRequest, cancellationToken);
-        httpResponse.EnsureSuccessStatusCode();
+        await EnsureSuccessStatusCodeAsync(httpResponse, cancellationToken);
         return await ParseResponseAsync(httpResponse, cancellationToken);
     }
 
@@ -134,8 +134,22 @@ public sealed class MercadoPagoClient : IMercadoPagoClient
         using var httpResponse = await _httpClient.GetAsync(
             $"v1/payments/{Uri.EscapeDataString(paymentId)}",
             cancellationToken);
-        httpResponse.EnsureSuccessStatusCode();
+        await EnsureSuccessStatusCodeAsync(httpResponse, cancellationToken);
         return await ParseResponseAsync(httpResponse, cancellationToken);
+    }
+
+    private static async Task EnsureSuccessStatusCodeAsync(
+        HttpResponseMessage response,
+        CancellationToken cancellationToken)
+    {
+        if (response.IsSuccessStatusCode)
+            return;
+
+        var details = await response.Content.ReadAsStringAsync(cancellationToken);
+        throw new HttpRequestException(
+            $"Mercado Pago rejeitou a solicitação com HTTP {(int)response.StatusCode}. Detalhes: {details}",
+            inner: null,
+            statusCode: response.StatusCode);
     }
 
     private static async Task<MercadoPagoBoletoResponse> ParseResponseAsync(

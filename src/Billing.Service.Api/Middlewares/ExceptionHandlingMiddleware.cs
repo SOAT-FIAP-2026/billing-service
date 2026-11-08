@@ -67,6 +67,9 @@ namespace Billing.Service.Api.Middlewares
                 ArgumentException => StatusCodes.Status400BadRequest,
                 InvalidOperationException => StatusCodes.Status400BadRequest,
                 UnauthorizedAccessException => StatusCodes.Status401Unauthorized,
+                HttpRequestException { StatusCode: >= System.Net.HttpStatusCode.BadRequest and < System.Net.HttpStatusCode.InternalServerError } httpException
+                    => (int)httpException.StatusCode!.Value,
+                HttpRequestException => StatusCodes.Status502BadGateway,
                 _ => StatusCodes.Status500InternalServerError
             };
         }
@@ -79,6 +82,9 @@ namespace Billing.Service.Api.Middlewares
                 ArgumentException => exception.Message,
                 InvalidOperationException => exception.Message,
                 UnauthorizedAccessException => exception.Message,
+                HttpRequestException { StatusCode: >= System.Net.HttpStatusCode.BadRequest and < System.Net.HttpStatusCode.InternalServerError }
+                    => "Os dados do pagamento foram rejeitados pelo provedor de pagamentos.",
+                HttpRequestException => "Não foi possível concluir a comunicação com o provedor de pagamentos.",
                 _ => "An unexpected internal error occurred."
             };
         }
