@@ -62,7 +62,8 @@ public sealed class MercadoPagoClient : IMercadoPagoClient
             request.Descricao,
             "bolbradesco",
             new PagadorRequest(request.Email, request.Nome, request.Sobrenome,
-                new IdentificacaoRequest("CPF", request.Cpf)),
+                new IdentificacaoRequest("CPF", request.Cpf),
+                CriarEndereco(request)),
             request.ReferenciaExterna,
             request.NotificationUrl);
 
@@ -152,6 +153,26 @@ public sealed class MercadoPagoClient : IMercadoPagoClient
             statusCode: response.StatusCode);
     }
 
+    private static EnderecoRequest? CriarEndereco(MercadoPagoBoletoRequest request)
+    {
+        var campos = new[]
+        {
+            request.Cep, request.Logradouro, request.Numero,
+            request.Bairro, request.Cidade, request.Estado
+        };
+
+        if (campos.Any(string.IsNullOrWhiteSpace))
+            return null;
+
+        return new EnderecoRequest(
+            request.Cep!,
+            request.Logradouro!,
+            request.Numero!,
+            request.Bairro!,
+            request.Cidade!,
+            request.Estado!);
+    }
+
     private static async Task<MercadoPagoBoletoResponse> ParseResponseAsync(
         HttpResponseMessage response,
         CancellationToken cancellationToken)
@@ -200,9 +221,18 @@ public sealed class MercadoPagoClient : IMercadoPagoClient
         string Email,
         [property: JsonPropertyName("first_name")] string FirstName,
         [property: JsonPropertyName("last_name")] string LastName,
-        IdentificacaoRequest Identification);
+        IdentificacaoRequest Identification,
+        EnderecoRequest? Address);
 
     private sealed record IdentificacaoRequest(string Type, string Number);
+
+    private sealed record EnderecoRequest(
+        [property: JsonPropertyName("zip_code")] string ZipCode,
+        [property: JsonPropertyName("street_name")] string StreetName,
+        [property: JsonPropertyName("street_number")] string StreetNumber,
+        string Neighborhood,
+        string City,
+        [property: JsonPropertyName("federal_unit")] string FederalUnit);
 
     private sealed record PagamentoResponse(
         JsonElement Id,

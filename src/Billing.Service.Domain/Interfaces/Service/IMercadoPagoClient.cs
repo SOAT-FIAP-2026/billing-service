@@ -9,7 +9,13 @@ public record MercadoPagoBoletoRequest(
     string Sobrenome,
     string Cpf,
     string? NotificationUrl,
-    string? IdempotencyKey = null);
+    string? IdempotencyKey = null,
+    string? Cep = null,
+    string? Logradouro = null,
+    string? Numero = null,
+    string? Bairro = null,
+    string? Cidade = null,
+    string? Estado = null);
 
 public record MercadoPagoBoletoResponse(
     string Id,

@@ -31,7 +31,7 @@ public class PagamentoServiceTests
             mercadoPago.Object,
             configuration);
         var result = await service.CriarBoletoAsync(
-            new CriarBoletoRequest(orcamento.Id, "cliente@teste.com", "Cliente", "Teste", "12345678909"),
+            CriarRequest(orcamento.Id),
             CancellationToken.None);
 
         Assert.Equal("mp-1", result.PaymentId);
@@ -58,7 +58,7 @@ public class PagamentoServiceTests
             ("MercadoPago:NotificationUrl", "https://api.test/webhook"));
 
         await service.CriarBoletoAsync(
-            new CriarBoletoRequest(orcamento.Id, "cliente@teste.com", "Cliente", "Teste", "12345678909"),
+            CriarRequest(orcamento.Id),
             CancellationToken.None);
 
         Assert.NotNull(requestEnviado);
@@ -92,7 +92,7 @@ public class PagamentoServiceTests
         var service = CriarService(orcamentoService, pagamentoRepository, mercadoPago);
 
         var result = await service.CriarBoletoAsync(
-            new CriarBoletoRequest(orcamento.Id, "cliente@teste.com", "Cliente", "Teste", "12345678909"),
+            CriarRequest(orcamento.Id),
             CancellationToken.None);
 
         Assert.NotNull(persistido);
@@ -115,7 +115,7 @@ public class PagamentoServiceTests
         var service = CriarService(orcamentoService: orcamentoService, mercadoPago: mercadoPago);
 
         var result = service.CriarBoletoAsync(
-            new CriarBoletoRequest(Guid.NewGuid(), "cliente@teste.com", "Cliente", "Teste", "12345678909"),
+            CriarRequest(Guid.NewGuid()),
             CancellationToken.None);
 
         Assert.Same(exception, await Assert.ThrowsAsync<InvalidOperationException>(() => result));
@@ -138,7 +138,7 @@ public class PagamentoServiceTests
         var service = CriarService(orcamentoService, pagamentoRepository, mercadoPago);
 
         var result = service.CriarBoletoAsync(
-            new CriarBoletoRequest(orcamento.Id, "cliente@teste.com", "Cliente", "Teste", "12345678909"),
+            CriarRequest(orcamento.Id),
             CancellationToken.None);
 
         Assert.Same(exception, await Assert.ThrowsAsync<HttpRequestException>(() => result));
@@ -254,4 +254,19 @@ public class PagamentoServiceTests
             mercadoPago?.Object ?? new Mock<IMercadoPagoClient>().Object,
             configuration);
     }
+
+    private static CriarBoletoRequest CriarRequest(Guid orcamentoId) =>
+        new(
+            orcamentoId,
+            "cliente@teste.com",
+            "Cliente",
+            "Teste",
+            "12345678909",
+            new EnderecoBoletoRequest(
+                "01311-000",
+                "Avenida Paulista",
+                "1000",
+                "Bela Vista",
+                "São Paulo",
+                "SP"));
 }

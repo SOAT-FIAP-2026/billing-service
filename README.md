@@ -60,7 +60,15 @@ Exemplo de criação:
   "email": "cliente@example.com",
   "nome": "João",
   "sobrenome": "Silva",
-  "cpf": "12345678909"
+  "cpf": "12345678909",
+  "endereco": {
+    "cep": "01311-000",
+    "logradouro": "Avenida Paulista",
+    "numero": "1000",
+    "bairro": "Bela Vista",
+    "cidade": "São Paulo",
+    "estado": "SP"
+  }
 }
 ```
 

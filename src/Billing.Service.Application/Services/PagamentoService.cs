@@ -22,6 +22,9 @@ public class PagamentoService(
         CancellationToken cancellationToken)
     {
         var orcamento = await orcamentoService.BuscarOrcamento(request.IdOrcamento);
+        if (request.Endereco is null)
+            throw new ArgumentException(
+                "O endereço completo do pagador é obrigatório para gerar o boleto.");
         var referencia = orcamento.Id.ToString();
         var mpResponse = await mercadoPagoClient.CriarBoletoAsync(
             new MercadoPagoBoletoRequest(
@@ -33,7 +36,13 @@ public class PagamentoService(
                 request.Sobrenome,
                 request.Cpf,
                 configuration["MercadoPago:NotificationUrl"],
-                orcamento.Id.ToString()),
+                orcamento.Id.ToString(),
+                request.Endereco?.Cep,
+                request.Endereco?.Logradouro,
+                request.Endereco?.Numero,
+                request.Endereco?.Bairro,
+                request.Endereco?.Cidade,
+                request.Endereco?.Estado),
             cancellationToken);
 
         var pagamento = Pagamento.CriarBoleto(orcamento.Id, orcamento.ValorTotal.Valor, referencia);
