@@ -132,6 +132,36 @@ public class OrcamentoServiceTests
     }
 
     [Fact]
+    public async Task EnviarOrcamento_DeveGerarEmailProfissionalComBotoesDeDecisao()
+    {
+        var repoMock = new Mock<IOrcamentoRepository>();
+        var emailMock = new Mock<IEmailService>();
+        string? html = null;
+        emailMock.Setup(e => e.EnviarEmailAsync("cliente@teste.com", It.IsAny<string>(), It.IsAny<string>()))
+            .Callback<string, string, string>((_, _, body) => html = body)
+            .ReturnsAsync(true);
+
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["Billing:PublicBaseUrl"] = "https://billing.example.com"
+            })
+            .Build();
+        var service = new OrcamentoService(repoMock.Object, emailMock.Object, configuration: configuration);
+        var orcamento = new Orcamento(Guid.NewGuid(), Guid.NewGuid(), 300m);
+        repoMock.Setup(r => r.ObterPorId(orcamento.Id)).ReturnsAsync(orcamento);
+
+        await service.EnviarOrcamento(orcamento.Id, "cliente@teste.com");
+
+        html.Should().Contain("Aprovar orçamento");
+        html.Should().Contain("Recusar orçamento");
+        html.Should().Contain($"https://billing.example.com/api/v1/orcamento/{orcamento.Id}/decisao?aprovado=true");
+        html.Should().Contain($"https://billing.example.com/api/v1/orcamento/{orcamento.Id}/decisao?aprovado=false");
+        html.Should().NotContain("IdOrdemServico");
+        html.Should().NotContain("Orçamento com ID");
+    }
+
+    [Fact]
     public async Task PagamentoService_AtualizarPorNotificacao_QuandoRejeitadoOuExpirado_DevePublicarCompensacao()
     {
         var orcServiceMock = new Mock<IOrcamentoService>();

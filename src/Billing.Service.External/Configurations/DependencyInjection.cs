@@ -11,6 +11,7 @@ namespace Billing.Service.External.Configurations
         {
             services.AddHttpClient<IEmailService, ResendEmailService>();
             services.AddHttpClient<IMercadoPagoClient, MercadoPagoClient>();
+            services.AddHttpClient("ordem-servico");
             return services;
         }
     }

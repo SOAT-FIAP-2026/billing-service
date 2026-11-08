@@ -36,6 +36,8 @@ services:
       MercadoPago__NotificationUrl: ${MERCADO_PAGO_NOTIFICATION_URL:-}
       RESEND_API_KEY: ${RESEND_API_KEY:-}
       RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL:-onboarding@resend.dev}
+      BILLING_PUBLIC_BASE_URL: ${BILLING_PUBLIC_BASE_URL:-http://localhost:8080}
+      ORDEM_SERVICO_API_BASE_URL: ${ORDEM_SERVICO_API_BASE_URL:-http://host.docker.internal:8081}
       AWS_REGION: ${AWS_REGION:-sa-east-2}
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-test}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-test}

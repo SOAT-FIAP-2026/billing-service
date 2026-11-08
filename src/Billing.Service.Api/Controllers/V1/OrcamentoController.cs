@@ -3,6 +3,7 @@ using Billing.Service.Application.Interfaces;
 using Fiap.TechChallenge.Contracts.BillingService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Text;
 namespace Billing.Service.Api.Controllers.V1
 {
     [ApiController]
@@ -54,6 +55,42 @@ namespace Billing.Service.Api.Controllers.V1
             string resultado = await _orcamentoService.EnviarOrcamento(id, request.EmailCliente);
 
             return Ok(resultado);
+        }
+
+        [HttpGet("{id:guid}/decisao")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status502BadGateway)]
+        public async Task<IActionResult> DecidirOrcamento(
+            Guid id,
+            [FromQuery] bool aprovado,
+            [FromServices] IHttpClientFactory httpClientFactory,
+            IConfiguration configuration,
+            CancellationToken cancellationToken)
+        {
+            var orcamento = await _orcamentoService.BuscarOrcamento(id);
+            var osApiBaseUrl = (configuration["OrdemServico:BaseUrl"]
+                ?? configuration["ORDEM_SERVICO_API_BASE_URL"]
+                ?? "http://localhost:8081").TrimEnd('/');
+            var targetUrl = $"{osApiBaseUrl}/api/v1/ordens-servico/{orcamento.IdOrdemServico}/aprovar-orcamento?aprovado={aprovado.ToString().ToLowerInvariant()}";
+
+            using var request = new HttpRequestMessage(HttpMethod.Patch, targetUrl);
+            using var response = await httpClientFactory.CreateClient("ordem-servico").SendAsync(request, cancellationToken);
+            if (!response.IsSuccessStatusCode)
+                return StatusCode(StatusCodes.Status502BadGateway,
+                    "Não foi possível registrar sua decisão. Tente novamente mais tarde.");
+
+            var title = aprovado ? "Orçamento aprovado" : "Orçamento recusado";
+            var message = aprovado
+                ? "Obrigado por confirmar. Daremos continuidade ao atendimento."
+                : "Sua recusa foi registrada. Se precisar de ajuda, entre em contato conosco.";
+            var html = $"""
+                <!DOCTYPE html>
+                <html lang="pt-BR"><body style="font-family:Arial,sans-serif;text-align:center;padding:48px;color:#243447;">
+                  <h1>{title}</h1><p>{message}</p>
+                </body></html>
+                """;
+            return Content(html, "text/html", Encoding.UTF8);
         }
     }
 }

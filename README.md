@@ -12,6 +12,8 @@ MercadoPago__WebhookSecret=<segredo da assinatura do webhook>
 ConnectionStrings__DefaultConnection=<connection string do PostgreSQL>
 RESEND_API_KEY=<API key do Resend>
 RESEND_FROM_EMAIL=<remetente verificado no Resend>
+BILLING_PUBLIC_BASE_URL=<URL pública do Billing Service>
+ORDEM_SERVICO_API_BASE_URL=<URL pública da Lambda de ordens de serviço>
 ```
 
 No GitHub Actions, cadastre `MERCADO_PAGO_ACCESS_TOKEN` e
@@ -34,6 +36,11 @@ Para o endpoint `POST /api/v1/orcamento/{id}/enviar-orcamento`, configure
 `RESEND_API_KEY` e um `RESEND_FROM_EMAIL` verificado. O endereço enviado no corpo
 da requisição é usado como destinatário; no plano gratuito do Resend, o destino
 pode precisar ser o e-mail autorizado da conta.
+
+Os botões do e-mail apontam para `GET /api/v1/orcamento/{id}/decisao` no Billing
+Service. Esse endpoint chama a rota `PATCH /api/v1/ordens-servico/{id}/aprovar-orcamento`
+da Lambda com `aprovado=true` ou `aprovado=false`. Em produção, as duas URLs
+públicas devem ser HTTPS e estar configuradas nas variáveis acima.
 
 Endpoints:
 
