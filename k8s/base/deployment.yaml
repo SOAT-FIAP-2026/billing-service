@@ -29,6 +29,7 @@ spec:
       annotations:
         ad.datadoghq.com/billing-service.logs: '[{"source":"csharp","service":"billing-service"}]'
     spec:
+      automountServiceAccountToken: false
       containers:
         - name: billing-service
           image: gabrielnetto94/billing-service:latest

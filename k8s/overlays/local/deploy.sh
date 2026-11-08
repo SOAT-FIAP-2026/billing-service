@@ -34,14 +34,7 @@ fi
 echo "📁 Aplicando namespace..."
 kubectl apply -f "$BASE_DIR/namespace.yaml"
 
-# --- 3. PostgreSQL local ---------------------------------------------------
-echo "🐘 Aplicando PostgreSQL local..."
-kubectl apply -f "$OVERLAY_DIR/postgres.yaml"
-
-echo "⏳ Aguardando PostgreSQL ficar pronto..."
-kubectl rollout status deployment/postgres -n techchallenge --timeout=120s
-
-# --- 4. ConfigMap e Secrets -----------------------------------------------
+# --- 3. ConfigMap e Secrets -----------------------------------------------
 # O secrets.yaml nao e versionado: ele e gerado a partir do template. Os valores
 # padrao servem apenas para o cluster local descartavel.
 export POSTGRES_PASSWORD="${POSTGRES_PASSWORD:-postgres}"
@@ -67,6 +60,13 @@ fi
 echo "🔧 Aplicando ConfigMap e Secrets..."
 kubectl apply -f "$OVERLAY_DIR/configmap.yaml"
 kubectl apply -f "$OVERLAY_DIR/secrets.yaml"
+
+# --- 4. PostgreSQL local ---------------------------------------------------
+echo "🐘 Aplicando PostgreSQL local..."
+kubectl apply -f "$OVERLAY_DIR/postgres.yaml"
+
+echo "⏳ Aguardando PostgreSQL ficar pronto..."
+kubectl rollout status deployment/postgres -n techchallenge --timeout=120s
 
 # --- 5. Deployment, Service e HPA ----------------------------------------
 echo "🌐 Aplicando Deployment, Service e HPA..."

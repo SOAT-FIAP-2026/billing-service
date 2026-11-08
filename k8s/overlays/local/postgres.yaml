@@ -25,6 +25,7 @@ spec:
         app.kubernetes.io/component: database
         app.kubernetes.io/part-of: techchallenge
     spec:
+      automountServiceAccountToken: false
       containers:
         - name: postgres
           image: postgres:16
@@ -36,7 +37,10 @@ spec:
             - name: POSTGRES_USER
               value: "postgres"
             - name: POSTGRES_PASSWORD
-              value: "postgres"
+              valueFrom:
+                secretKeyRef:
+                  name: billing-service-secret
+                  key: Postgres__Password
           resources:
             requests:
               cpu: 100m
