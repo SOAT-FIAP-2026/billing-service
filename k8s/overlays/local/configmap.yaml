@@ -9,7 +9,7 @@ metadata:
 data:
   ASPNETCORE_ENVIRONMENT: "Development"
   # NOSONAR — ambiente local sem certificado; não é exposto diretamente à Internet.
-  ASPNETCORE_URLS: "https://+:8080"
+  ASPNETCORE_URLS: "http://+:8080"
   OTEL_SERVICE_NAME: "billing-service"
   OTEL_EXPORTER_OTLP_PROTOCOL: "http/protobuf"
   # NOSONAR — endpoint interno do cluster; o collector não expõe TLS neste ambiente.

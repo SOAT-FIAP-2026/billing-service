@@ -1,0 +1,122 @@
+name: CD
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "src/**"
+      - "Dockerfile"
+      - "k8s/**"
+      - ".github/workflows/cd.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  IMAGE_NAME: gabrielnetto94/billing-service
+  TEST_PROJECT: tests/Billing.Service.Tests/Billing.Service.Tests.csproj
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Billing Service
+        uses: actions/checkout@v4
+
+      - name: Checkout shared contracts
+        uses: actions/checkout@v4
+        with:
+          repository: SOAT-FIAP-2026/shared
+          ref: main
+          path: .shared
+          token: ${{ secrets.GH_PAT || github.token }}
+
+      - name: Move shared to sibling directory (../shared)
+        run: |
+          rm -rf ../shared
+          mv .shared ../shared
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Test
+        run: dotnet test ${{ env.TEST_PROJECT }} --configuration Release --verbosity normal
+
+  deploy-k8s:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    env:
+      CLUSTER_NAME: techchallenge-ci
+      NAMESPACE: techchallenge
+      DEPLOYMENT: billing-service
+    steps:
+      - name: Checkout Billing Service
+        uses: actions/checkout@v4
+
+      - name: Checkout shared contracts
+        uses: actions/checkout@v4
+        with:
+          repository: SOAT-FIAP-2026/shared
+          ref: main
+          path: .shared
+          token: ${{ secrets.GH_PAT || github.token }}
+
+      - name: Move shared to sibling directory (../shared)
+        run: |
+          rm -rf ../shared
+          mv .shared ../shared
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          build-contexts: |
+            shared=../shared
+          load: true
+          push: false
+          tags: |
+            ${{ env.IMAGE_NAME }}:latest
+            ${{ env.IMAGE_NAME }}:sha256-${{ github.sha }}
+
+      - name: Create Kubernetes cluster (kind)
+        uses: helm/kind-action@v1
+        with:
+          cluster_name: ${{ env.CLUSTER_NAME }}
+
+      - name: Load image into the cluster
+        run: kind load docker-image ${{ env.IMAGE_NAME }}:latest --name ${{ env.CLUSTER_NAME }}
+
+      - name: Deploy manifests (k8s/overlays/local)
+        run: |
+          chmod +x k8s/overlays/local/deploy.sh
+          POSTGRES_PASSWORD="$(openssl rand -hex 16)" ./k8s/overlays/local/deploy.sh kind
+
+      - name: Smoke test
+        run: |
+          kubectl -n ${{ env.NAMESPACE }} port-forward service/${{ env.DEPLOYMENT }} 8080:80 > /tmp/port-forward.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://localhost:8080/health/ready; then echo; exit 0; fi
+            sleep 2
+          done
+          echo "Health check falhou" >&2
+          exit 1
+
+      - name: Cluster state
+        if: always()
+        run: |
+          kubectl -n ${{ env.NAMESPACE }} get deployments,pods,services -o wide
+          kubectl -n ${{ env.NAMESPACE }} get deployment/${{ env.DEPLOYMENT }} -o jsonpath='{.spec.template.spec.containers[0].image}{"\n"}'
+
+      - name: Diagnostics
+        if: failure()
+        run: |
+          kubectl -n ${{ env.NAMESPACE }} describe deployment/${{ env.DEPLOYMENT }}
+          kubectl -n ${{ env.NAMESPACE }} describe pods
+          kubectl -n ${{ env.NAMESPACE }} logs deployment/${{ env.DEPLOYMENT }} --tail=200 || true
