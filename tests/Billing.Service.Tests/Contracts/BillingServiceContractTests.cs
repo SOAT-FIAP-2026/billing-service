@@ -128,7 +128,7 @@ public class BillingServiceContractTests
 
         Enum.GetNames<StatusPagamentoContrato>()
             .Should()
-            .Equal("Pendente", "Aprovado", "Recusado", "Expirado", "Estornado");
+            .Equal("Pendente", "Aprovado", "Rejeitado", "Cancelado", "Expirado");
     }
 
     private static T RoundTrip<T>(T value)
