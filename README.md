@@ -1,6 +1,6 @@
 # billing-service
 
-Microsserviço responsável por **orçamentos, emissão de boletos, confirmação de pagamentos via Mercado Pago, notificações por e-mail (Resend) e participação na Saga coreografada** do ecossistema Tech Challenge (SOAT/FIAP — Fase 4). 
+Microsserviço responsável por **orçamentos, emissão de boletos, confirmação de pagamentos via Mercado Pago, notificações por e-mail (Resend) e participação na Saga coreografada** do ecossistema Tech Challenge (SOAT/FIAP — Fase 4).
 
 ---
 
