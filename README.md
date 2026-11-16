@@ -90,6 +90,11 @@ flowchart TB
 | `GET` | `/metrics` | Scraping de métricas Prometheus |
 | `GET` | `/swagger` | Documentação OpenAPI / Swagger UI |
 
+O endpoint de decisão envia o cabeçalho `X-API-Key` ao OS quando
+`ORDEM_SERVICO_API_KEY` (ou `OrdemServico:ApiKey`) está configurado. Em
+ambientes implantados, forneça esse valor via Secret; não o versionar no
+repositório.
+
 ---
 
 ## Implementação e Justificativa do Saga Pattern

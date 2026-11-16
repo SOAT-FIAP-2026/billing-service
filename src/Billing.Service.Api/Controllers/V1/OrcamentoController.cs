@@ -75,6 +75,11 @@ namespace Billing.Service.Api.Controllers.V1
             var targetUrl = $"{osApiBaseUrl}/api/v1/ordens-servico/{orcamento.IdOrdemServico}/aprovar-orcamento?aprovado={aprovado.ToString().ToLowerInvariant()}";
 
             using var request = new HttpRequestMessage(HttpMethod.Patch, targetUrl);
+            var osApiKey = configuration["OrdemServico:ApiKey"]
+                ?? configuration["ORDEM_SERVICO_API_KEY"];
+            if (!string.IsNullOrWhiteSpace(osApiKey))
+                request.Headers.TryAddWithoutValidation("X-API-Key", osApiKey);
+
             using var response = await httpClientFactory.CreateClient("ordem-servico").SendAsync(request, cancellationToken);
             if (!response.IsSuccessStatusCode)
                 return StatusCode(StatusCodes.Status502BadGateway,
