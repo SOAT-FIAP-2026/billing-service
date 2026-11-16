@@ -180,10 +180,12 @@ RESEND_API_KEY=<API key do Resend>
 RESEND_FROM_EMAIL=<remetente verificado no Resend>
 BILLING_PUBLIC_BASE_URL=<URL pública do Billing Service>
 ORDEM_SERVICO_API_BASE_URL=<URL pública da Lambda de ordens de serviço>
+ORDEM_SERVICO_API_KEY=<API key da Lambda de ordens de serviço>
 ```
 
-No GitHub Actions, cadastre `MERCADO_PAGO_ACCESS_TOKEN` e
-`MERCADO_PAGO_WEBHOOK_SECRET` como **Repository secrets**. O workflow de
+No GitHub Actions, cadastre `MERCADO_PAGO_ACCESS_TOKEN`,
+`MERCADO_PAGO_WEBHOOK_SECRET`, `ORDEM_SERVICO_API_BASE_URL` e
+`ORDEM_SERVICO_API_KEY` como **Repository secrets**. O workflow de
 deploy configura esses valores na Lambda e preserva as demais variáveis já
 existentes. A URL de teste atualmente configurada é:
 

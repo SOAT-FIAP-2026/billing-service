@@ -69,9 +69,17 @@ namespace Billing.Service.Api.Controllers.V1
             CancellationToken cancellationToken)
         {
             var orcamento = await _orcamentoService.BuscarOrcamento(id);
-            var osApiBaseUrl = (configuration["OrdemServico:BaseUrl"]
+            var configuredOsApiBaseUrl = configuration["OrdemServico:BaseUrl"]
                 ?? configuration["ORDEM_SERVICO_API_BASE_URL"]
-                ?? "http://localhost:8081").TrimEnd('/');
+                ?? string.Empty;
+            if (!Uri.TryCreate(configuredOsApiBaseUrl, UriKind.Absolute, out var osApiBaseUri) ||
+                osApiBaseUri.Scheme is not ("http" or "https"))
+            {
+                return StatusCode(StatusCodes.Status502BadGateway,
+                    "O serviço de ordens de serviço não está configurado.");
+            }
+
+            var osApiBaseUrl = configuredOsApiBaseUrl.TrimEnd('/');
             var targetUrl = $"{osApiBaseUrl}/api/v1/ordens-servico/{orcamento.IdOrdemServico}/aprovar-orcamento?aprovado={aprovado.ToString().ToLowerInvariant()}";
 
             using var request = new HttpRequestMessage(HttpMethod.Patch, targetUrl);
@@ -80,10 +88,24 @@ namespace Billing.Service.Api.Controllers.V1
             if (!string.IsNullOrWhiteSpace(osApiKey))
                 request.Headers.TryAddWithoutValidation("X-API-Key", osApiKey);
 
-            using var response = await httpClientFactory.CreateClient("ordem-servico").SendAsync(request, cancellationToken);
-            if (!response.IsSuccessStatusCode)
+            HttpResponseMessage response;
+            try
+            {
+                response = await httpClientFactory.CreateClient("ordem-servico")
+                    .SendAsync(request, cancellationToken);
+            }
+            catch (HttpRequestException)
+            {
                 return StatusCode(StatusCodes.Status502BadGateway,
-                    "Não foi possível registrar sua decisão. Tente novamente mais tarde.");
+                    "Não foi possível conectar ao serviço de ordens de serviço.");
+            }
+
+            using (response)
+            {
+                if (!response.IsSuccessStatusCode)
+                    return StatusCode(StatusCodes.Status502BadGateway,
+                        "Não foi possível registrar sua decisão. Tente novamente mais tarde.");
+            }
 
             var title = aprovado ? "Orçamento aprovado" : "Orçamento recusado";
             var message = aprovado

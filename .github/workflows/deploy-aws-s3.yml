@@ -70,6 +70,7 @@ jobs:
           MERCADO_PAGO_WEBHOOK_SECRET: ${{ secrets.MERCADO_PAGO_WEBHOOK_SECRET }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           RESEND_FROM_EMAIL: ${{ secrets.RESEND_FROM_EMAIL }}
+          ORDEM_SERVICO_API_BASE_URL: ${{ secrets.ORDEM_SERVICO_API_BASE_URL }}
           ORDEM_SERVICO_API_KEY: ${{ secrets.ORDEM_SERVICO_API_KEY }}
           MERCADO_PAGO_NOTIFICATION_URL: https://figg7rtf4l7sqb2t2fsodkq45m0vmtkt.lambda-url.us-east-2.on.aws/api/v1/pagamento/webhook
         run: |
@@ -87,6 +88,10 @@ jobs:
             echo "::error::Secret RESEND_API_KEY não configurado."
             exit 1
           }
+          test -n "$ORDEM_SERVICO_API_BASE_URL" || {
+            echo "::error::Secret ORDEM_SERVICO_API_BASE_URL não configurado."
+            exit 1
+          }
           test -n "$ORDEM_SERVICO_API_KEY" || {
             echo "::error::Secret ORDEM_SERVICO_API_KEY não configurado."
             exit 1
@@ -102,6 +107,7 @@ jobs:
             --arg webhookSecret "$MERCADO_PAGO_WEBHOOK_SECRET" \
             --arg resendApiKey "$RESEND_API_KEY" \
             --arg resendFromEmail "${RESEND_FROM_EMAIL:-onboarding@resend.dev}" \
+            --arg ordemServicoApiBaseUrl "$ORDEM_SERVICO_API_BASE_URL" \
             --arg ordemServicoApiKey "$ORDEM_SERVICO_API_KEY" \
             --arg notificationUrl "$MERCADO_PAGO_NOTIFICATION_URL" \
             '. + {
@@ -109,6 +115,8 @@ jobs:
               "MercadoPago__WebhookSecret": $webhookSecret,
               "RESEND_API_KEY": $resendApiKey,
               "RESEND_FROM_EMAIL": $resendFromEmail,
+              "ORDEM_SERVICO_API_BASE_URL": $ordemServicoApiBaseUrl,
+              "OrdemServico__BaseUrl": $ordemServicoApiBaseUrl,
               "ORDEM_SERVICO_API_KEY": $ordemServicoApiKey,
               "MercadoPago__NotificationUrl": $notificationUrl
             } | { "Variables": . }' lambda-environment.json > lambda-environment.updated.json
